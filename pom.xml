@@ -60,4 +60,7 @@
 	</build>
 
 
+	<modules>
+		<module>dl4jsink</module>
+	</modules>
 </project>
