@@ -62,5 +62,6 @@
 
 	<modules>
 		<module>dl4jsink</module>
+		<module>nn</module>
 	</modules>
 </project>
