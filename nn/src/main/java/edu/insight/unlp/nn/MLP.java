@@ -134,4 +134,9 @@ public class MLP implements NN {
 		return layers;
 	}
 
+	@Override
+	public double[] outputSequence(double[][] inputSeq) {
+		return null;
+	}
+
 }

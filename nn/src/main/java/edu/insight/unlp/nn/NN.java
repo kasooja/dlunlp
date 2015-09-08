@@ -7,6 +7,8 @@ import java.util.List;
 public interface NN {
 
 	public double[] output(double[] input);
+	
+	public double[] outputSequence(double[][] inputSeq);
 
 	public void update(double learningRate);
 

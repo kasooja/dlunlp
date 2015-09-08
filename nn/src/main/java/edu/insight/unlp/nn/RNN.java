@@ -42,7 +42,7 @@ public class RNN implements NN {
 		return 0.0;
 	}
 
-	public double batchgdTrainSeq(List<SequenceM21> training, double learningRate, int batchSize, boolean shuffle){
+	public double sgdTrainSeq(List<SequenceM21> training, double learningRate, int batchSize, boolean shuffle){
 		double overallError = 0.0;
 		for(SequenceM21 seq : training){
 			double[][] inputSeq = seq.inputSeq;
@@ -52,6 +52,8 @@ public class RNN implements NN {
 			eg = bp(eg);
 			double error = eg[networkOutput.length];
 			overallError = overallError + error;
+			update(learningRate);
+			resetActivationCounter();
 		}
 		return overallError / training.size();
 	}
@@ -70,7 +72,7 @@ public class RNN implements NN {
 
 	private double[] bp(double[] errorGradient){
 		int o = errorGradient.length;
-		for(int j=layers.get(layers.size()-1).getActivationCounterVal(); j>0; j--){
+		for(int j=layers.get(layers.size()-1).getActivationCounterVal(); j>=0; j--){
 			for(int i = layers.size() - 1; i>0; i--){
 				errorGradient = layers.get(i).errorGradient(errorGradient);
 			}
@@ -116,6 +118,19 @@ public class RNN implements NN {
 	public double sgdTrain(double[][] inputs, double[][] targets,
 			double learningRate) {
 		return 0;
+	}
+
+	@Override
+	public double[] outputSequence(double[][] inputSeq) {
+		double[] result = null;
+		for(double[] input : inputSeq){
+			result = input;		
+			for(NNLayer layer : layers){
+				result = layer.output(result);
+			}
+		}
+		networkOutput = result;
+		return networkOutput;
 	}
 
 }

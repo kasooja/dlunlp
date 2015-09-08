@@ -6,7 +6,6 @@ import java.util.Map;
 public class InputLayer implements NNLayer {
 
 	private int numUnits;
-	private double[] activations;
 	private int activationCounter = -1;
 	private Map<Integer, double[]> lastActivations; //needed by this layer for feedback from the last example, RNN
 
@@ -35,31 +34,31 @@ public class InputLayer implements NNLayer {
 
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
-		activations = new double[numUnits];
 		lastActivations = new HashMap<Integer, double[]>();
 	}
 
 	@Override
 	public double[] computeActivations(double[] input) {
-		activations = input;
 		activationCounter++;
-		lastActivations.put(activationCounter, activations);
-		return activations;
+		lastActivations.put(activationCounter, input);
+		return input;
 	}
 
 	@Override
 	public double[] activations() {
-		return activations;
+		return lastActivations.get(activationCounter);
 	}
 
 	public void resetActivationCounter(){
-		activationCounter = 0;
+		activationCounter = -1;
+		lastActivations = new HashMap<Integer, double[]>();
 	}
 
 	@Override
 	public double[] output(double[] input) {
-		activations = input;
-		return activations;
+		activationCounter++;
+		lastActivations.put(activationCounter, input);
+		return input;
 	}
 
 	@Override

@@ -160,7 +160,7 @@ public class DigitClassifier {
 			do {
 				epoch++;
 				//double trainingError = nn.sgdTrain(trainingData, trainingTargets, 0.01);
-				double trainingError = nn.batchgdTrainSeq(trainingSeq, 0.04, batchSize, false);
+				double trainingError = nn.sgdTrainSeq(trainingSeq, 0.04, batchSize, false);
 				int ce = ((int)(Math.exp(-trainingError)*100));
 				System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 				correctlyClassified = test(nn, testData, testTargets);
