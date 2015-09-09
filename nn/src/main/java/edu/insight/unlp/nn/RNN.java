@@ -33,6 +33,16 @@ public class RNN implements NN {
 		}
 	}
 
+	
+	public void update(double learningRate, double momentum) {
+		for(NNLayer layer : layers){
+			int index = layers.indexOf(layer);
+			if(index!=layers.size()-1){
+				layers.get(index+1).update(learningRate, momentum);
+			}
+		}
+	}
+
 	@Override
 	public double error(double[] inputs, double[] target) {
 		return 0;
@@ -42,7 +52,7 @@ public class RNN implements NN {
 		return 0.0;
 	}
 
-	public double sgdTrainSeq(List<SequenceM21> training, double learningRate, int batchSize, boolean shuffle){
+	public double sgdTrainSeq(List<SequenceM21> training, double learningRate, int batchSize, boolean shuffle, double momentum){
 		double overallError = 0.0;
 		for(SequenceM21 seq : training){
 			double[][] inputSeq = seq.inputSeq;
@@ -52,7 +62,7 @@ public class RNN implements NN {
 			eg = bp(eg);
 			double error = eg[networkOutput.length];
 			overallError = overallError + error;
-			update(learningRate);
+			update(learningRate, momentum);
 			resetActivationCounter();
 		}
 		return overallError / training.size();

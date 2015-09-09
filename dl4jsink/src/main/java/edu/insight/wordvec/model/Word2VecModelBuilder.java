@@ -18,11 +18,12 @@ import edu.insight.unlp.otdf.OTDFXmlReader;
 
 public class Word2VecModelBuilder {
 
-	public static void main(String[] args){		
+	public static void wikiBuilder(String[] args){		
 		OTDFXmlReader otdfXmlReader = new OTDFXmlReader(args[0]);
 		SentencePreProcessor sentencePreProcessor = new SentencePreProcessor() {
 			private static final long serialVersionUID = 1L;
 			public String preProcess(String sentence) {
+				sentence = sentence.toLowerCase();
 				return new InputHomogenization(sentence).transform();
 			}
 		};
@@ -38,6 +39,28 @@ public class Word2VecModelBuilder {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
+	}
+	
+	public static void main(String[] args){
+		SentencePreProcessor sentencePreProcessor = new SentencePreProcessor() {
+			private static final long serialVersionUID = 1L;
+			public String preProcess(String sentence) {
+				return new InputHomogenization(sentence).transform();
+			}
+		};
+		String electronicsDataFilePath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/electronics.csv";
+		//String hotelDataFilePath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/hotel.csv";
+		SentenceIterator dataIter = new SuggestionSentenceIterator(sentencePreProcessor, electronicsDataFilePath);
+		try {
+			TokenizerFactory t;			
+			t = new UimaTokenizerFactory();
+			Word2Vec vec = new Word2Vec.Builder().minWordFrequency(4).layerSize(10).windowSize(8).iterate(dataIter).tokenizerFactory(t).build();
+			vec.fit();
+			SerializationUtils.saveObject(vec, new File(args[1]));
+		} catch (ResourceInitializationException e1) {
+			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

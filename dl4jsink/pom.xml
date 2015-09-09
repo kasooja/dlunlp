@@ -17,7 +17,19 @@
 		<canova.version>0.0.0.4</canova.version>
 	</properties>
 
+
+	<!-- <properties> <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
+		<nd4j.version>0.0.3.5.5.3</nd4j.version> <deeplearning4j.version>0.0.3.3.3.alpha1</deeplearning4j.version> 
+		<canova.version>0.0.0.4</canova.version> </properties> -->
+
 	<dependencies>
+
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.3</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-jblas</artifactId>
@@ -28,7 +40,6 @@
 			<groupId>org.nd4j</groupId>
 			<artifactId>canova-api</artifactId>
 			<version>${canova.version}</version>
-
 		</dependency>
 
 

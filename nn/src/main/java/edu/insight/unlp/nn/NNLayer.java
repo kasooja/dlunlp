@@ -16,6 +16,8 @@ public interface NNLayer {
 
 	public void update(double learningRate);
 	
+	public void update(double learningRate, double momentum);
+	
 	public double[] computeActivations(double[] input);
 	
 	public double[] output(double[] input);

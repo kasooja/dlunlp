@@ -9,14 +9,16 @@ import org.deeplearning4j.util.SerializationUtils;
 public class Word2VecTest {
 
 	public static void test(Word2Vec vec){
-		String one = "sex";
-		String two = "like";
-		System.out.println(vec.wordsNearest(one, 100));//gsimilarWordsInVocabTo("love", 0.8));
+		String one = "apex";
+		String two = "dvd";
+		System.out.println(vec.wordsNearest(one, 100));;
 		System.out.println(vec.similarity(one, two));
-		System.out.println(vec.similarity(one, "inout"));		
-		System.out.println(vec.similarity(one, "fuck"));
-		
-		System.out.println();
+		double[] wordVector = vec.getWordVector(two);
+		System.out.println(wordVector.length);
+		for(double s : wordVector){
+			System.out.println(s);
+			
+		}
 	}
 
 	public static void main(String[] args) {
@@ -25,5 +27,8 @@ public class Word2VecTest {
 		test(vec);
 		System.out.println("exp done");		
 	}
+	
+	
+	
 
 }

@@ -72,7 +72,7 @@ public class XorRNN {
 		int batchSize = trainingData.length/100;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrainSeq(trainingSeq, 0.04, batchSize, false);
+			double trainingError = nn.sgdTrainSeq(trainingSeq, 0.04, batchSize, false, 0.4);
 			int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 			correctlyClassified = test(nn, testData, testTargets);

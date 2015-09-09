@@ -9,6 +9,7 @@ public class FullyConnectedRNNLayer implements NNLayer {
 	private ActivationFunction af;
 	private double[] weights; //keeps the weights of the connections from the previous layer
 	private double[] deltas;
+	private double[] prevDeltas;
 	//private double[] activations; //needed by the next layer, or this layer for feedback from the last example
 	//private double[] signals; //can be removed if derivatives calculated in the computeActivations method, but then derivatives need to be stored
 	private Map<Integer, double[]> lastActivationDerivatives;
@@ -16,7 +17,7 @@ public class FullyConnectedRNNLayer implements NNLayer {
 	private double[] nextStageError;
 	private NN nn;
 	private int activationCounter = -1;
-	
+
 	public FullyConnectedRNNLayer(int numUnits, ActivationFunction af, NN nn) {
 		this.numUnits = numUnits;
 		this.af = af;
@@ -27,7 +28,7 @@ public class FullyConnectedRNNLayer implements NNLayer {
 	public int numNeuronUnits() {
 		return numUnits;
 	}
-	
+
 	public int getActivationCounterVal(){
 		return activationCounter;
 	}
@@ -98,6 +99,7 @@ public class FullyConnectedRNNLayer implements NNLayer {
 		weights = new double[(previousLayerUnits+1+numUnits) * numUnits]; //+numUnits for feedback
 		IntStream.range(0, weights.length).forEach(i -> weights[i] = (Math.random() * 2 - 1));
 		deltas = new double[weights.length];
+		prevDeltas = new double[weights.length];
 		lastActivations = new HashMap<Integer, double[]>();
 		lastActivationDerivatives = new HashMap<Integer, double[]>();
 		lastActivations.put(-1, new double[numUnits]);
@@ -142,4 +144,9 @@ public class FullyConnectedRNNLayer implements NNLayer {
 		return outputs;
 	}
 
+	@Override
+	public void update(double learningRate, double momentum) {
+		IntStream.range(0, weights.length).forEach(i -> weights[i] = weights[i] - learningRate * deltas[i] - momentum * prevDeltas[i]);
+		prevDeltas  = deltas;
+	}
 }

@@ -106,4 +106,10 @@ public class FullyConnectedLayer implements NNLayer {
 		return activationCounter;
 	}
 
+	@Override
+	public void update(double learningRate, double momentum) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
