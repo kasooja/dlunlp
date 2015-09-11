@@ -10,7 +10,6 @@ public class InputLayerRNN implements NNLayer {
 	private int numUnits;
 	private int activationCounter = -1;
 	private Map<Integer, double[]> lastActivations; //needed by this layer for feedback from the last example, RNN
-	private double[] activations;
 
 	public InputLayerRNN(int numUnits){
 		this.numUnits = numUnits;
@@ -44,13 +43,12 @@ public class InputLayerRNN implements NNLayer {
 	public double[] computeActivations(double[] input) {
 		activationCounter++;
 		lastActivations.put(activationCounter, input);
-		activations = input;
 		return input;
 	}
 
 	@Override
 	public double[] activations() {
-		return activations;
+		return lastActivations.get(activationCounter);
 	}
 
 	public void resetActivationCounter(){
@@ -62,7 +60,6 @@ public class InputLayerRNN implements NNLayer {
 	public double[] output(double[] input) {
 		activationCounter++;
 		lastActivations.put(activationCounter, input);
-		activations = input;
 		return input;
 	}
 
@@ -73,8 +70,6 @@ public class InputLayerRNN implements NNLayer {
 
 	@Override
 	public void update(double learningRate, double momentum) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }
