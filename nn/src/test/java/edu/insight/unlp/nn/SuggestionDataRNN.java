@@ -12,6 +12,11 @@ import java.util.StringTokenizer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
+import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.ef.CrossEntropyErrorFunction;
+import edu.insight.unlp.nn.mlp.InputLayer;
+import edu.insight.unlp.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.rnn.RNN;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class SuggestionDataRNN {
@@ -130,16 +135,17 @@ public class SuggestionDataRNN {
 	}
 
 	public static void main(String[] args) {
-		RNN nn = new RNN(new SquareErrorFunction());
+		//RNN nn = new RNN(new SquareErrorFunction());
+		RNN nn = new RNN(new CrossEntropyErrorFunction());
 		double momentum = 0.7;
 		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(6, new Sigmoid(), nn);
+		//FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(6, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(8, new Sigmoid(), nn);
 		InputLayer inputLayer = new InputLayer(10);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
-		layers.add(hiddenLayer1);
+		//layers.add(hiddenLayer1);
 		layers.add(outputLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
@@ -154,16 +160,14 @@ public class SuggestionDataRNN {
 		int batchSize = trainingData.size()/100;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
+			double trainingError = nn.sgdTrainSeq(trainingData, 0.002, batchSize, false, momentum);
 			int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 			correctlyClassified = test(nn, testData);
-			int classIndex = 0;
-			for(double predictedCorrect : predictedCorrectClassTotals){
-				System.out.println("Class " + (classIndex+1) + ": ");
-				System.out.println("Precision: " + predictedCorrectClassTotals[classIndex]/predictedTotalClassTotals[classIndex]);
+			for(int classIndex=0; classIndex<predictedCorrectClassTotals.length; classIndex++){
+				System.out.print("Class " + (classIndex+1) + ": ");
+				System.out.print("Precision: " + predictedCorrectClassTotals[classIndex]/predictedTotalClassTotals[classIndex] + " ");
 				System.out.println("Recall: " + predictedCorrectClassTotals[classIndex]/actualClassTotals[classIndex]);
-				classIndex++;
 			}			
 			System.out.println("Overall Accuracy: " + (int)(correctlyClassified*100));
 		} while (correctlyClassified < 1.0);

@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import edu.insight.unlp.nn.FullyConnectedLayer;
-import edu.insight.unlp.nn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.InputLayer;
-import edu.insight.unlp.nn.MLP;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
-import edu.insight.unlp.nn.RNN;
 import edu.insight.unlp.nn.SequenceM21;
-import edu.insight.unlp.nn.Sigmoid;
-import edu.insight.unlp.nn.SquareErrorFunction;
+import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.ef.CrossEntropyErrorFunction;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
+import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
+import edu.insight.unlp.nn.mlp.InputLayer;
+import edu.insight.unlp.nn.mlp.MLP;
+import edu.insight.unlp.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.rnn.RNN;
 
 public class DigitClassifier {
 
@@ -70,23 +71,23 @@ public class DigitClassifier {
 		return lines;
 	}
 
-	public static void mainMLP(String[] args) {
+	public static void main(String[] args) {
 		String traindataFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/trainData/traindata";
 		String traintargetsFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/trainData/traintargets";
 		String testdataFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/testData/testdata";
 		String testtargetsFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/testData/testtargets";
-		NN nn = new MLP(new SquareErrorFunction());
+		//NN nn = new MLP(new SquareErrorFunction());
+		NN nn = new MLP(new CrossEntropyErrorFunction());
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(10, new Sigmoid(), nn);		
-		FullyConnectedLayer output1Layer = new FullyConnectedLayer(10, new Sigmoid(), nn);
 		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(5, new Sigmoid(), nn);		
 		InputLayer inputLayer = new InputLayer(256);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
-		layers.add(output1Layer);
 		layers.add(outputLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
+		double momentum = 0.8;
 		try {
 			System.err.print("Reading data...");
 			double[][] trainingData = parseFile(new BufferedReader(new FileReader(traindataFile)), 3000, 256);
@@ -96,11 +97,10 @@ public class DigitClassifier {
 			System.err.println("done.");
 			int epoch = 0;
 			double correctlyClassified;
-			int batchSize = trainingData.length/100;
+			int batchSize = trainingData.length/2000;
 			do {
 				epoch++;
-				//double trainingError = nn.sgdTrain(trainingData, trainingTargets, 0.01);
-				double trainingError = nn.batchgdTrain(trainingData, trainingTargets, 0.04, batchSize, false);
+				double trainingError = nn.batchgdTrain(trainingData, trainingTargets, 0.001, batchSize, true, momentum);
 				int ce = ((int)(Math.exp(-trainingError)*100));
 				System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 				correctlyClassified = test(nn, testData, testTargets);
@@ -111,19 +111,19 @@ public class DigitClassifier {
 		}
 	}
 
-
-	public static void main(String[] args) {
+	public static void mainRNN(String[] args) {
 		String traindataFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/trainData/traindata";
 		String traintargetsFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/trainData/traintargets";
 		String testdataFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/testData/testdata";
 		String testtargetsFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/testData/testtargets";
 		RNN nn = new RNN(new SquareErrorFunction());
-		//FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(5, new Sigmoid(), nn);
+		//RNN nn = new RNN(new CrossEntropyErrorFunction());
 		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
+		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(5, new Sigmoid(), nn);
 		InputLayer inputLayer = new InputLayer(256);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
-		//layers.add(hiddenLayer);
+		layers.add(hiddenLayer);
 		layers.add(outputLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
@@ -156,11 +156,11 @@ public class DigitClassifier {
 			System.err.println("done.");
 			int epoch = 0;
 			double correctlyClassified;
-			int batchSize = trainingData.length/100;
+			int batchSize = trainingData.length/200;
 			do {
 				epoch++;
 				//double trainingError = nn.sgdTrain(trainingData, trainingTargets, 0.01);
-				double trainingError = nn.sgdTrainSeq(trainingSeq, 0.04, batchSize, false, 0.4);
+				double trainingError = nn.sgdTrainSeq(trainingSeq, 0.01, batchSize, false, 0.8);
 				int ce = ((int)(Math.exp(-trainingError)*100));
 				System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 				correctlyClassified = test(nn, testData, testTargets);

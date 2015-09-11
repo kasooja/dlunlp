@@ -10,7 +10,7 @@ public interface NN {
 	
 	public double[] outputSequence(double[][] inputSeq);
 
-	public void update(double learningRate);
+	public void update(double learningRate, double momentum);
 
 	public int numOutputUnits();
 	
@@ -18,13 +18,8 @@ public interface NN {
 
 	public double error(double[] inputs, double[] target);
 
-	public double batchgdTrain(double[][] inputs, double[][] targets, double learningRate, int batchSize, boolean shuffle);
+	public double batchgdTrain(double[][] inputs, double[][] targets, double learningRate, int batchSize, boolean shuffle, double momentum);
 
-	/*
-	 * sgd not require, as batchgd function can do it, by giving the batch size = 1, and shuffle true
-	 */
-	public double sgdTrain(double[][] inputs, double[][] targets, double learningRate);
-	
 	public void setLayers(List<NNLayer> layers);
 	
 	public List<NNLayer> getLayers();

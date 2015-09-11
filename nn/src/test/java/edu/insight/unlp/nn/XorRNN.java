@@ -4,6 +4,12 @@ package edu.insight.unlp.nn;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
+import edu.insight.unlp.nn.mlp.InputLayer;
+import edu.insight.unlp.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.rnn.RNN;
+
 public class XorRNN {
 
 	public static double test(NN network, double[][] inputs, double[][] targets) {

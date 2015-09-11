@@ -29,6 +29,15 @@
 		</dependency>
 
 		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka</artifactId>
+			<version>3.7.10</version>
+			<scope>system</scope>
+			<systemPath>/Users/kartik/git/dlunlp/nn/src/main/resources/lib/weka-3.7.10.jar</systemPath>
+		</dependency>
+
+
+		<dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-jblas</artifactId>
 			<version>${nd4j.version}</version>
