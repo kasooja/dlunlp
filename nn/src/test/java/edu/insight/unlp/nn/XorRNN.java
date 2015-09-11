@@ -7,8 +7,8 @@ import java.util.List;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.mlp.InputLayer;
-import edu.insight.unlp.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.rnn.RNN;
+import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.nn.rnn.RNN;
 
 public class XorRNN {
 

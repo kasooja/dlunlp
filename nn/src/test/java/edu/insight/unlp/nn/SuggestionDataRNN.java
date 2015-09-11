@@ -15,8 +15,8 @@ import org.deeplearning4j.util.SerializationUtils;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.ef.CrossEntropyErrorFunction;
 import edu.insight.unlp.nn.mlp.InputLayer;
-import edu.insight.unlp.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.rnn.RNN;
+import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.nn.rnn.RNN;
 import au.com.bytecode.opencsv.CSVReader;
 
 public class SuggestionDataRNN {
