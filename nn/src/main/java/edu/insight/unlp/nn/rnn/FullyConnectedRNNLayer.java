@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import org.apache.commons.math.random.RandomDataImpl;
+
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
@@ -102,7 +104,11 @@ public class FullyConnectedRNNLayer implements NNLayer {
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
 		weights = new double[(previousLayerUnits+1+numUnits) * numUnits]; //+numUnits for feedback
-		IntStream.range(0, weights.length).forEach(i -> weights[i] = (Math.random() * 2 - 1));
+		
+		double eInit = Math.sqrt(6) / Math.sqrt(numUnits + previousLayerUnits);
+		setWeightsUniformly(seedRandomGenerator(), eInit);
+	
+	//	IntStream.range(0, weights.length).forEach(i -> weights[i] = (Math.random() * 2 - 1));
 		deltas = new double[weights.length];
 		prevDeltas = new double[weights.length];
 		lastActivations = new HashMap<Integer, double[]>();
@@ -110,6 +116,24 @@ public class FullyConnectedRNNLayer implements NNLayer {
 		lastActivations.put(-1, new double[numUnits]);
 		nextStageError = new double[numUnits + 1];
 	}
+	
+	/**
+	 * Sets the weights in the whole matrix uniformly between -eInit and eInit
+	 * (eInit is the standard deviation) with zero mean.
+	 */
+	private void setWeightsUniformly(RandomDataImpl rnd, double eInit) {
+		for (int i = 0; i < weights.length; i++) {		
+			weights[i] = rnd.nextUniform(-eInit, eInit);
+		}
+	}
+
+	private RandomDataImpl seedRandomGenerator() {
+		RandomDataImpl rnd = new RandomDataImpl();
+		rnd.reSeed(System.currentTimeMillis());
+		rnd.reSeedSecure(System.currentTimeMillis());
+		return rnd;
+	}
+
 
 	@Override
 	public double[] computeActivations(double[] input) {

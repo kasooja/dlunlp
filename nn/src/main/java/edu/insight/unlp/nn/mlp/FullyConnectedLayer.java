@@ -84,6 +84,7 @@ public class FullyConnectedLayer implements NNLayer {
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
 		weights = new double[(previousLayerUnits+1) * numUnits];
+		
 		double eInit = Math.sqrt(6) / Math.sqrt(numUnits + previousLayerUnits);
 		setWeightsUniformly(seedRandomGenerator(), eInit);
 		//IntStream.range(0, weights.length).forEach(i -> weights[i] = (Math.random() * 2 - 1));
@@ -139,9 +140,5 @@ public class FullyConnectedLayer implements NNLayer {
 		return rnd;
 	}
 
-	@Override
-	public String toString() {
-		return weights.toString();
-	}
 
 }

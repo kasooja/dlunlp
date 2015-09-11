@@ -13,13 +13,13 @@ import java.util.StringTokenizer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
-import edu.insight.unlp.nn.af.Sigmoid;
-import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.mlp.InputLayer;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.RNN;
 import weka.core.Instance;
 import weka.core.Instances;
+import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
+import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.nn.rnn.InputLayerRNN;
+import edu.insight.unlp.nn.rnn.RNN;
 
 public class GRCTCDataRNN {
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
@@ -162,9 +162,9 @@ public class GRCTCDataRNN {
 		//RNN nn = new RNN(new CrossEntropyErrorFunction());
 		double momentum = 0.9;
 		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(9, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(5, new Sigmoid(), nn);
-		InputLayer inputLayer = new InputLayer(300);
+		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(5, new Sigmoid(), nn);
+		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
+		InputLayerRNN inputLayer = new InputLayerRNN(300);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
@@ -194,7 +194,7 @@ public class GRCTCDataRNN {
 
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrainSeq(trainingData, 0.01, batchSize, false, momentum);
+			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
 			int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 			correctlyClassified = test(nn, testData);

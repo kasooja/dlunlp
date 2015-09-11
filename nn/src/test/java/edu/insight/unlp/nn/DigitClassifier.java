@@ -81,7 +81,7 @@ public class DigitClassifier {
 		NN nn = new MLP(new SquareErrorFunction());
 		//NN nn = new MLP(new CrossEntropyErrorFunction());
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(10, new Sigmoid(), nn);		
-		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(5, new Tanh(), nn);		
+		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(5, new ReLU(), nn);		
 		InputLayer inputLayer = new InputLayer(256);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
@@ -99,7 +99,7 @@ public class DigitClassifier {
 			System.err.println("done.");
 			int epoch = 0;
 			double correctlyClassified;
-			int batchSize = trainingData.length/2000;
+			int batchSize = trainingData.length/200;
 			do {
 				epoch++;
 				double trainingError = nn.batchgdTrain(trainingData, trainingTargets, 0.01, batchSize, true, momentum);
