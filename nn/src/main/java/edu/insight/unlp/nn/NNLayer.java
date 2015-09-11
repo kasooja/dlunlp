@@ -10,8 +10,6 @@ public interface NNLayer {
 	
 	public double[] activations();
 	
-	//public double[] avgActivations();
-	
 	public double[] errorGradient(double[] input);
 
 	public void update(double learningRate);
