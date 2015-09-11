@@ -67,6 +67,13 @@
 			<version>${deeplearning4j.version}</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.5</version>
+		</dependency>
+
+
 	</dependencies>
 
 

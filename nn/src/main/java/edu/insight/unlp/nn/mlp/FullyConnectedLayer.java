@@ -3,6 +3,8 @@ package edu.insight.unlp.nn.mlp;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import org.apache.commons.math.random.RandomDataImpl;
+
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
@@ -29,7 +31,7 @@ public class FullyConnectedLayer implements NNLayer {
 	public int numNeuronUnits() {
 		return numUnits;
 	}
-	
+
 	@Override
 	public void resetActivationCounter(){
 		activationCounter = -1;
@@ -78,11 +80,13 @@ public class FullyConnectedLayer implements NNLayer {
 		IntStream.range(0, weights.length).forEach(i -> weights[i] = weights[i] - learningRate * deltas[i] - momentum * prevDeltas[i]);
 		prevDeltas = deltas;
 	}
-	
+
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
 		weights = new double[(previousLayerUnits+1) * numUnits];
-		IntStream.range(0, weights.length).forEach(i -> weights[i] = (Math.random() * 2 - 1));
+		double eInit = Math.sqrt(6) / Math.sqrt(numUnits + previousLayerUnits);
+		setWeightsUniformly(seedRandomGenerator(), eInit);
+		//IntStream.range(0, weights.length).forEach(i -> weights[i] = (Math.random() * 2 - 1));
 		deltas = new double[weights.length];
 		prevDeltas = new double[weights.length];
 		activations = new double[numUnits];
@@ -101,7 +105,7 @@ public class FullyConnectedLayer implements NNLayer {
 		IntStream.range(0, signals.length).forEach(i -> activations[i] = af.activation(signals[i]));
 		return activations;
 	}
-	
+
 	private double[] computeSignals(double[] input){
 		double outputs[] = new double[numUnits];
 		for (int i = 0; i < outputs.length; i++) {
@@ -116,6 +120,28 @@ public class FullyConnectedLayer implements NNLayer {
 	@Override
 	public int getActivationCounterVal() {
 		return activationCounter;
+	}
+
+	/**
+	 * Sets the weights in the whole matrix uniformly between -eInit and eInit
+	 * (eInit is the standard deviation) with zero mean.
+	 */
+	private void setWeightsUniformly(RandomDataImpl rnd, double eInit) {
+		for (int i = 0; i < weights.length; i++) {		
+			weights[i] = rnd.nextUniform(-eInit, eInit);
+		}
+	}
+
+	private RandomDataImpl seedRandomGenerator() {
+		RandomDataImpl rnd = new RandomDataImpl();
+		rnd.reSeed(System.currentTimeMillis());
+		rnd.reSeedSecure(System.currentTimeMillis());
+		return rnd;
+	}
+
+	@Override
+	public String toString() {
+		return weights.toString();
 	}
 
 }
