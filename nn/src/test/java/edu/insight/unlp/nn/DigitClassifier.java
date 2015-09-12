@@ -11,6 +11,7 @@ import java.util.Random;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.SequenceM21;
+import edu.insight.unlp.nn.af.HardTanh;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
@@ -81,7 +82,7 @@ public class DigitClassifier {
 		NN nn = new MLP(new SquareErrorFunction());
 		//NN nn = new MLP(new CrossEntropyErrorFunction());
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(10, new Sigmoid(), nn);		
-		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(5, new ReLU(), nn);		
+		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(40, new ReLU(), nn);		
 		InputLayer inputLayer = new InputLayer(256);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
@@ -107,7 +108,7 @@ public class DigitClassifier {
 				System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 				correctlyClassified = test(nn, testData, testTargets);
 				System.out.println((int)(correctlyClassified*100)+"% correctly classified");
-			} while (correctlyClassified < 0.9);
+			} while (correctlyClassified < 1.0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -17,7 +17,6 @@ public class FullyConnectedRNNLayer implements NNLayer {
 	private double[] deltas;
 	private double[] prevDeltas;
 	//private double[] activations; //needed by the next layer, or this layer for feedback from the last example
-	//private double[] signals; //can be removed if derivatives calculated in the computeActivations method, but then derivatives need to be stored
 	private Map<Integer, double[]> lastActivationDerivatives;
 	private Map<Integer, double[]> lastActivations; //needed by this layer for feedback from the last example, RNN	
 	private double[] nextStageError;

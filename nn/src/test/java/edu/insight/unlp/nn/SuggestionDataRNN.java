@@ -12,22 +12,34 @@ import java.util.StringTokenizer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
-import edu.insight.unlp.nn.af.Sigmoid;
-import edu.insight.unlp.nn.ef.CrossEntropyErrorFunction;
-import edu.insight.unlp.nn.mlp.InputLayer;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.RNN;
 import au.com.bytecode.opencsv.CSVReader;
+import edu.insight.unlp.nn.af.ReLU;
+import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
+import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
+import edu.insight.unlp.nn.rnn.InputLayerRNN;
+import edu.insight.unlp.nn.rnn.RNN;
+import edu.insight.unlp.nn.rnn.SoftMaxLayer;
 
 public class SuggestionDataRNN {
 
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
 	private static Word2Vec vec = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
+	//private static Word2Vec vec = null; 
 	private static double[] actualClassTotals = new double[3]; //last one to hold the overall totals
 	private static double[] actualClassTrainingTotals = new double[3]; //last one to hold the overall totals
 	private static double[] predictedCorrectClassTotals = new double[3]; //last one to hold the overall totals
 	private static double[] predictedTotalClassTotals = new double[3]; //last one to hold the overall totals
+
+//	static {
+//		try {
+//			vec = WordVectorSerializer.loadGoogleModel(gModel, true);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}	
+//	}
 
 	public static double test(NN network, List<SequenceM21> testData) {
 		for(int m=0; m<predictedCorrectClassTotals.length; m++){
@@ -135,18 +147,20 @@ public class SuggestionDataRNN {
 	}
 
 	public static void main(String[] args) {
-		//RNN nn = new RNN(new SquareErrorFunction());
-		RNN nn = new RNN(new CrossEntropyErrorFunction());
-		double momentum = 0.7;
-		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
-		//FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(6, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(8, new Sigmoid(), nn);
-		InputLayer inputLayer = new InputLayer(10);
+		RNN nn = new RNN(new SquareErrorFunction());
+		//RNN nn = new RNN(new CrossEntropyErrorFunction());
+		double momentum = 0.9;
+		SoftMaxLayer softmaxLayer = new SoftMaxLayer(3, nn);
+		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
+		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new ReLU(), nn);
+		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new ReLU(), nn);
+		InputLayerRNN inputLayer = new InputLayerRNN(10);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
-		//layers.add(hiddenLayer1);
-		layers.add(outputLayer);
+		layers.add(hiddenLayer1);
+		layers.add(preOutputLayer);
+		layers.add(softmaxLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
@@ -160,7 +174,7 @@ public class SuggestionDataRNN {
 		int batchSize = trainingData.size()/100;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrainSeq(trainingData, 0.002, batchSize, false, momentum);
+			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
 			int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 			correctlyClassified = test(nn, testData);

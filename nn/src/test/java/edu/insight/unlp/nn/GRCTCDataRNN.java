@@ -15,7 +15,9 @@ import org.deeplearning4j.util.SerializationUtils;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.af.Tanh;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
 import edu.insight.unlp.nn.rnn.InputLayerRNN;
@@ -102,7 +104,7 @@ public class GRCTCDataRNN {
 					target[i] = value;
 				} else {
 					text = instance.stringValue(instance.attribute(i)).toLowerCase();
-					System.out.println(text);
+					//System.out.println(text);
 				}
 			}
 			text = text.toLowerCase();
@@ -162,8 +164,8 @@ public class GRCTCDataRNN {
 		//RNN nn = new RNN(new CrossEntropyErrorFunction());
 		double momentum = 0.9;
 		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(9, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(5, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
+		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(25, new ReLU(), nn);
+		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(70, new Tanh(), nn);
 		InputLayerRNN inputLayer = new InputLayerRNN(300);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
@@ -191,7 +193,6 @@ public class GRCTCDataRNN {
 		int epoch = 0;
 		double correctlyClassified;
 		int batchSize = trainingData.size()/100;
-
 		do {
 			epoch++;
 			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
