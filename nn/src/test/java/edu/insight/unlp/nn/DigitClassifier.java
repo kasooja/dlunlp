@@ -22,6 +22,7 @@ import edu.insight.unlp.nn.mlp.InputLayer;
 import edu.insight.unlp.nn.mlp.MLP;
 import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
 import edu.insight.unlp.nn.rnn.RNN;
+import edu.insight.unlp.nn.rnn.SoftMaxLayer;
 
 public class DigitClassifier {
 
@@ -81,6 +82,7 @@ public class DigitClassifier {
 		String testtargetsFile = "/Users/kartik/Work/Workspaces/Workspaces/Luna/NNs/nnlearn/nnlearn.bauerNN/src/main/resources/data/DigitClassifier/testData/testtargets";
 		NN nn = new MLP(new SquareErrorFunction());
 		//NN nn = new MLP(new CrossEntropyErrorFunction());
+		SoftMaxLayer softmaxLayer = new SoftMaxLayer(10, nn);
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(10, new Sigmoid(), nn);		
 		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(40, new ReLU(), nn);		
 		InputLayer inputLayer = new InputLayer(256);
@@ -88,6 +90,7 @@ public class DigitClassifier {
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
 		layers.add(outputLayer);
+		layers.add(softmaxLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
 		double momentum = 0.8;
@@ -108,7 +111,7 @@ public class DigitClassifier {
 				System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
 				correctlyClassified = test(nn, testData, testTargets);
 				System.out.println((int)(correctlyClassified*100)+"% correctly classified");
-			} while (correctlyClassified < 1.0);
+			} while (correctlyClassified < 0.95);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

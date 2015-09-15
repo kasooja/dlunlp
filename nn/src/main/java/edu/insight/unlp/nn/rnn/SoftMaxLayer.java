@@ -44,7 +44,7 @@ public class SoftMaxLayer implements NNLayer {
 	public double[] errorGradient(double[] eg) {
 		double[] activations = lastActivations.get(activationCounter);
 		double weightedErrorSum = 0.0;
-		for (int i=0; i<activations.length-1; i++) {
+		for (int i=0; i<activations.length; i++) {
 			weightedErrorSum += eg[i] * activations[i];
 		}
 		double[] propagatedError = new double[activations.length+1];
