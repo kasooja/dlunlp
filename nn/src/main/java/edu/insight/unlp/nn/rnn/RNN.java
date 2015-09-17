@@ -14,7 +14,7 @@ public class RNN implements NN {
 
 	public List<NNLayer> layers;
 	public ErrorFunction ef;
-	public double[] networkOutput;
+	public double[][] networkOutput;
 
 	public RNN(ErrorFunction ef){
 		this.ef = ef;
@@ -52,6 +52,25 @@ public class RNN implements NN {
 		for(SequenceM21 seq : training){
 			double[][] inputSeq = seq.inputSeq;
 			double[] target = seq.target;
+			ff(inputSeq);
+			double[][] eg = new double[networkOutput.length][];
+			for(int i=0; i<networkOutput.length; i++){
+				eg[i] = ef.error(target, networkOutput[i]);
+			}
+			double[] bp = bp(eg);
+			double error = bp[bp.length-1];
+			overallError = overallError + error;
+			update(learningRate, momentum);
+			resetActivationCounter();
+		}
+		return overallError / training.size();
+	}
+	
+	public double sgdTrainSeqErrorAtLast(List<SequenceM21> training, double learningRate, int batchSize, boolean shuffle, double momentum){
+		double overallError = 0.0;
+		for(SequenceM21 seq : training){
+			double[][] inputSeq = seq.inputSeq;
+			double[] target = seq.target;
 			double[] networkOutput = ff(inputSeq);
 			double[] eg = ef.error(target, networkOutput);
 			eg = bp(eg);
@@ -65,14 +84,31 @@ public class RNN implements NN {
 
 	private double[] ff(double[][] inputSeq){
 		double[] activations = null;
+		networkOutput = new double[inputSeq.length][];
+		int i = 0;
 		for(double[] input : inputSeq){
 			activations = input;		
 			for(NNLayer layer : layers){
 				activations = layer.computeActivations(activations);
 			}
+			networkOutput[i++] = activations;
 		}
-		networkOutput = activations;
-		return networkOutput;
+		return activations;
+	}
+
+	private double[] bp(double[][] errorGradient){
+		int o = errorGradient[0].length-1;
+		double[] stageErrorGradient = null;
+		for(int j=layers.get(layers.size()-1).getActivationCounterVal(); j>=0; j--){
+			for(int i = layers.size() - 1; i>0; i--){
+				stageErrorGradient = layers.get(i).errorGradient(errorGradient[j]);
+			}
+			double totalError = stageErrorGradient[stageErrorGradient.length-1];
+			if(j-1>-1){
+				errorGradient[j-1][o] = totalError;
+			}
+		}
+		return stageErrorGradient;
 	}
 
 	private double[] bp(double[] errorGradient){
@@ -86,7 +122,7 @@ public class RNN implements NN {
 		}
 		return errorGradient;
 	}
-
+	
 	public void resetActivationCounter(){
 		for(NNLayer layer : layers){
 			layer.resetActivationCounter();
@@ -128,8 +164,8 @@ public class RNN implements NN {
 				result = layer.output(result);
 			}
 		}
-		networkOutput = result;
-		return networkOutput;
+		//networkOutput = result;
+		return result;
 	}
 
 }
