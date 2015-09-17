@@ -1,10 +1,13 @@
 
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.rnn;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.insight.unlp.nn.NN;
+import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.mlp.InputLayer;
 import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;

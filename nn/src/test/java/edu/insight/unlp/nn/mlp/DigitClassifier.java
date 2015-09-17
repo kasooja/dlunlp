@@ -1,5 +1,5 @@
 
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.mlp;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -10,11 +10,12 @@ import java.util.Random;
 
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
-import edu.insight.unlp.nn.SequenceM21;
 import edu.insight.unlp.nn.af.HardTanh;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
+import edu.insight.unlp.nn.common.SequenceM21;
+import edu.insight.unlp.nn.common.SoftMaxLayer;
 import edu.insight.unlp.nn.ef.CrossEntropyErrorFunction;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
@@ -22,7 +23,6 @@ import edu.insight.unlp.nn.mlp.InputLayer;
 import edu.insight.unlp.nn.mlp.MLP;
 import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
 import edu.insight.unlp.nn.rnn.RNN;
-import edu.insight.unlp.nn.rnn.SoftMaxLayer;
 
 public class DigitClassifier {
 

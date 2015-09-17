@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.rnn;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,13 +15,17 @@ import org.deeplearning4j.util.SerializationUtils;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import edu.insight.unlp.nn.NN;
+import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
+import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
 import edu.insight.unlp.nn.rnn.InputLayerRNN;
 import edu.insight.unlp.nn.rnn.RNN;
+import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCDataRNN {
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
