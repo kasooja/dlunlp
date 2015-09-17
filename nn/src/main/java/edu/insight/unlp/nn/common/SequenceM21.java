@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.common;
 
 /*
  * many to one (M21) sequence

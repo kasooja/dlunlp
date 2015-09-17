@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn.rnn;
+package edu.insight.unlp.nn.common;
 
 import java.util.HashMap;
 import java.util.Map;

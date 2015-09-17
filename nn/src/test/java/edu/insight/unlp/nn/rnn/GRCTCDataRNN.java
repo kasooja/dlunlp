@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.rnn;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,20 +15,22 @@ import org.deeplearning4j.util.SerializationUtils;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import edu.insight.unlp.nn.NN;
+import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
+import edu.insight.unlp.nn.common.InputLayer;
+import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.InputLayerRNN;
-import edu.insight.unlp.nn.rnn.RNN;
+import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCDataRNN {
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	private static Word2Vec vec = null; 
-	//SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	//SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	private static double[] actualClassTotals = new double[9]; 
 	private static double[] actualClassTrainingTotals = new double[9]; 
 	private static double[] predictedCorrectClassTotals = new double[9]; 
@@ -166,7 +168,7 @@ public class GRCTCDataRNN {
 		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(9, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(25, new ReLU(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(70, new Tanh(), nn);
-		InputLayerRNN inputLayer = new InputLayerRNN(300);
+		InputLayer inputLayer = new InputLayer(300);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
@@ -176,11 +178,11 @@ public class GRCTCDataRNN {
 		nn.initializeNN();
 
 		System.err.print("Reading serialized word vectors...");
-		tokenVectorMap = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/grctcDataWordVectorMap.vecMap"));
+		tokenVectorMap = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/grctc/grctcDataWordVectorMap.vecMap"));
 		System.err.print("Done");
 
 		System.err.print("Reading data...");
-		String grctcDataFilePath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/USUKAMLAll9Labels_all.arff";
+		String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
 		readData(grctcDataFilePath);
 		System.err.println("done.");
 

@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.rnn;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,24 +9,26 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+
+//import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
+import edu.insight.unlp.nn.NN;
+import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.common.InputLayer;
+import edu.insight.unlp.nn.common.SequenceM21;
+import edu.insight.unlp.nn.common.SoftMaxLayer;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.InputLayerRNN;
-import edu.insight.unlp.nn.rnn.RNN;
-import edu.insight.unlp.nn.rnn.SoftMaxLayer;
 
 public class SuggestionDataRNN {
 
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
-	private static Word2Vec vec = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	private static Word2Vec vec = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	//private static Word2Vec vec = null; 
 	private static double[] actualClassTotals = new double[3]; //last one to hold the overall totals
@@ -155,7 +157,7 @@ public class SuggestionDataRNN {
 		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new ReLU(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new ReLU(), nn);
-		InputLayerRNN inputLayer = new InputLayerRNN(10);
+		InputLayer inputLayer = new InputLayer(10);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
@@ -165,7 +167,7 @@ public class SuggestionDataRNN {
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
-		String electronicsDataFilePath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/electronics.csv";
+		String electronicsDataFilePath = "src/test/resources/data/Sequence/suggestion/electronics.csv";
 		readData(electronicsDataFilePath);
 		System.out.println("TestDataSize: " + testData.size());
 		System.out.println("TrainingDataSize: " + trainingData.size());

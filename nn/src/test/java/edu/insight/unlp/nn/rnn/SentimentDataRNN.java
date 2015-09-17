@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn;
+package edu.insight.unlp.nn.rnn;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,18 +11,19 @@ import java.util.StringTokenizer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
+import edu.insight.unlp.nn.NN;
+import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.common.InputLayer;
+import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.InputLayerRNN;
-import edu.insight.unlp.nn.rnn.RNN;
-import edu.insight.unlp.nn.rnn.SoftMaxLayer;
+import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class SentimentDataRNN {
 
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
-	private static Word2Vec vec = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	private static Word2Vec vec = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	//private static Word2Vec vec = null; 
 	private static double[] actualClassTestTotals = new double[2]; //last one to hold the overall totals
@@ -120,22 +121,22 @@ public class SentimentDataRNN {
 		RNN nn = new RNN(new SquareErrorFunction());
 		//RNN nn = new RNN(new CrossEntropyErrorFunction());
 		double momentum = 0.9;
-		SoftMaxLayer softmaxLayer = new SoftMaxLayer(3, nn);
-		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
+		//SoftMaxLayer softmaxLayer = new SoftMaxLayer(2, nn);
+		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(2, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
-		InputLayerRNN inputLayer = new InputLayerRNN(10);
+		InputLayer inputLayer = new InputLayer(10);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
 		layers.add(hiddenLayer1);
 		layers.add(preOutputLayer);
-		layers.add(softmaxLayer);
+	//	layers.add(softmaxLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
-		String posSentDataDirPath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/rt-polaritydata/rt-polarity.pos";
-		String negSentDataDirPath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/rt-polaritydata/rt-polarity.neg";
+		String posSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.pos";
+		String negSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.neg";
 		double[] posTarget = new double[]{0, 1};
 		double[] negTarget = new double[]{1, 0};
 		readData(posSentDataDirPath, posTarget);

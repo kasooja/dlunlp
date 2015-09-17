@@ -5,7 +5,7 @@ import java.util.List;
 import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
-import edu.insight.unlp.nn.SequenceM21;
+import edu.insight.unlp.nn.common.SequenceM21;
 
 /*
  * RNNs
@@ -49,7 +49,6 @@ public class RNN implements NN {
 
 	public double sgdTrainSeq(List<SequenceM21> training, double learningRate, int batchSize, boolean shuffle, double momentum){
 		double overallError = 0.0;
-		
 		for(SequenceM21 seq : training){
 			double[][] inputSeq = seq.inputSeq;
 			double[] target = seq.target;
