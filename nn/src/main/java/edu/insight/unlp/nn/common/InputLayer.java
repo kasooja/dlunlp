@@ -1,5 +1,6 @@
-package edu.insight.unlp.nn.mlp;
+package edu.insight.unlp.nn.common;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import edu.insight.unlp.nn.NNLayer;
@@ -8,7 +9,7 @@ public class InputLayer implements NNLayer {
 
 	private int numUnits;
 	private int activationCounter = -1;
-	private double[] activations;
+	private Map<Integer, double[]> lastActivations; //needed by this layer for feedback from the last example, RNN
 
 	public InputLayer(int numUnits){
 		this.numUnits = numUnits;
@@ -21,7 +22,7 @@ public class InputLayer implements NNLayer {
 
 	@Override
 	public Map<Integer, double[]> lastActivations() {
-		return null;
+		return lastActivations;
 	}
 
 	@Override
@@ -35,28 +36,30 @@ public class InputLayer implements NNLayer {
 
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
+		lastActivations = new HashMap<Integer, double[]>();
 	}
 
 	@Override
 	public double[] computeActivations(double[] input) {
 		activationCounter++;
-		activations = input;
+		lastActivations.put(activationCounter, input);
 		return input;
 	}
 
 	@Override
 	public double[] activations() {
-		return activations;
+		return lastActivations.get(activationCounter);
 	}
 
 	public void resetActivationCounter(){
 		activationCounter = -1;
+		lastActivations = new HashMap<Integer, double[]>();
 	}
 
 	@Override
 	public double[] output(double[] input) {
 		activationCounter++;
-		activations = input;
+		lastActivations.put(activationCounter, input);
 		return input;
 	}
 

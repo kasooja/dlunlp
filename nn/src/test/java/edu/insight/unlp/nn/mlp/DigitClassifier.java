@@ -11,6 +11,7 @@ import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.common.InputLayer;
 import edu.insight.unlp.nn.common.SoftMaxLayer;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 
@@ -72,7 +73,7 @@ public class DigitClassifier {
 		String testtargetsFile = "src/test/resources/data/DigitClassifier/testData/testtargets";
 		NN nn = new MLP(new SquareErrorFunction());
 		//NN nn = new MLP(new CrossEntropyErrorFunction());
-		SoftMaxLayer softmaxLayer = new SoftMaxLayer(10, nn);
+		//SoftMaxLayer softmaxLayer = new SoftMaxLayer(10, nn);
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(10, new Sigmoid(), nn);		
 		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(40, new ReLU(), nn);		
 		InputLayer inputLayer = new InputLayer(256);
@@ -80,7 +81,7 @@ public class DigitClassifier {
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
 		layers.add(outputLayer);
-		layers.add(softmaxLayer);
+		//layers.add(softmaxLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
 		double momentum = 0.8;

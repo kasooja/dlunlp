@@ -20,11 +20,9 @@ import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
+import edu.insight.unlp.nn.common.InputLayer;
 import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.InputLayerRNN;
-import edu.insight.unlp.nn.rnn.RNN;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCDataRNN {
@@ -170,7 +168,7 @@ public class GRCTCDataRNN {
 		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(9, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(25, new ReLU(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(70, new Tanh(), nn);
-		InputLayerRNN inputLayer = new InputLayerRNN(300);
+		InputLayer inputLayer = new InputLayer(300);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);

@@ -14,11 +14,9 @@ import org.deeplearning4j.util.SerializationUtils;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.common.InputLayer;
 import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.InputLayerRNN;
-import edu.insight.unlp.nn.rnn.RNN;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class SentimentDataRNN {
@@ -127,7 +125,7 @@ public class SentimentDataRNN {
 		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(2, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
-		InputLayerRNN inputLayer = new InputLayerRNN(10);
+		InputLayer inputLayer = new InputLayer(10);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);

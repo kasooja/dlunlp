@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+
 //import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
@@ -18,12 +19,10 @@ import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.common.InputLayer;
 import edu.insight.unlp.nn.common.SequenceM21;
 import edu.insight.unlp.nn.common.SoftMaxLayer;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
-import edu.insight.unlp.nn.rnn.InputLayerRNN;
-import edu.insight.unlp.nn.rnn.RNN;
 
 public class SuggestionDataRNN {
 
@@ -158,7 +157,7 @@ public class SuggestionDataRNN {
 		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new ReLU(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new ReLU(), nn);
-		InputLayerRNN inputLayer = new InputLayerRNN(10);
+		InputLayer inputLayer = new InputLayer(10);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
