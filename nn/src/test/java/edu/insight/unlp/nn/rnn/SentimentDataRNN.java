@@ -4,10 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
 
+import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
@@ -22,22 +25,22 @@ import edu.insight.unlp.nn.utils.BasicFileTools;
 public class SentimentDataRNN {
 
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
-	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
-	private static Word2Vec vec = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
-	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
-	//private static Word2Vec vec = null; 
-	private static double[] actualClassTestTotals = new double[2]; //last one to hold the overall totals
-	private static double[] actualClassTrainingTotals = new double[2]; //last one to hold the overall totals
-	private static double[] predictedCorrectClassTotals = new double[2]; //last one to hold the overall totals
-	private static double[] predictedTotalClassTotals = new double[2]; //last one to hold the overall totals
+	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();
+	private static Word2Vec vec = null;// = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
+	private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
+	private static double[] actualClassTestTotals = new double[2]; //binary classification, + -
+	private static double[] actualClassTrainingTotals = new double[2];
+	private static double[] predictedCorrectClassTotals = new double[2];
+	private static double[] predictedTotalClassTotals = new double[2];
+	private static Map<String, double[]> tokenVectorMap = new HashMap<String, double[]>();
 
-	//	static {
-	//		try {
-	//			vec = WordVectorSerializer.loadGoogleModel(gModel, true);
-	//		} catch (IOException e) {
-	//			e.printStackTrace();
-	//		}	
-	//	}
+	static {
+//		try {
+//			vec = WordVectorSerializer.loadGoogleModel(gModel, true);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}	
+	}
 
 	public static double test(NN network, List<SequenceM21> testData) {
 		for(int m=0; m<predictedCorrectClassTotals.length; m++){
@@ -85,13 +88,22 @@ public class SentimentDataRNN {
 		try {
 			while((line = br.readLine())!=null){
 				line = line.toLowerCase();
- 				StringTokenizer tokenizer = new StringTokenizer(line);
+				StringTokenizer tokenizer = new StringTokenizer(line);
 				List<double[]> inputWordVectors = new ArrayList<double[]>();
 				while(tokenizer.hasMoreTokens()){
-					String token = tokenizer.nextToken();
-					double[] wordVector = vec.getWordVector(token);
+					String token = tokenizer.nextToken().trim().toLowerCase();
+					double[] wordVector = null;
+					if(token.equals("")) {
+						continue;
+					}
+					if(tokenVectorMap.containsKey(token)){
+						wordVector = tokenVectorMap.get(token);
+					} else {
+						wordVector = vec.getWordVector(token);
+					}
 					if(wordVector!=null){
-						inputWordVectors.add(wordVector);	
+						inputWordVectors.add(wordVector);
+						tokenVectorMap.put(token, wordVector);
 					}
 				}
 				int classIndex = 0; //binary classification, only 1 class would be positive
@@ -125,15 +137,21 @@ public class SentimentDataRNN {
 		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(2, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new Sigmoid(), nn);
 		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
-		InputLayer inputLayer = new InputLayer(10);
+		InputLayer inputLayer = new InputLayer(300);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
 		layers.add(hiddenLayer1);
 		layers.add(preOutputLayer);
-	//	layers.add(softmaxLayer);
+		//	layers.add(softmaxLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
+
+
+		System.err.print("Reading serialized word vectors...");
+		tokenVectorMap = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/sentiment/sentimentWikiWord.vecMap"));
+		System.err.print("Done");
+
 		System.err.print("Reading data...");
 		String posSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.pos";
 		String negSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.neg";
@@ -144,6 +162,11 @@ public class SentimentDataRNN {
 		System.out.println("TestDataSize: " + testData.size());
 		System.out.println("TrainingDataSize: " + trainingData.size());
 		System.err.println("done.");
+
+//		System.err.print("Serializing word vectors...");
+//		SerializationUtils.saveObject(tokenVectorMap, new File("src/test/resources/data/Sequence/sentiment/sentimentWikiWord.vecMap"));
+//		System.err.println("done.");
+
 		int epoch = 0;
 		double correctlyClassified;
 		int batchSize = trainingData.size()/100;

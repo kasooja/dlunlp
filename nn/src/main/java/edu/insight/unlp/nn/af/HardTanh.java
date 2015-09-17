@@ -10,7 +10,7 @@ public class HardTanh implements ActivationFunction {
 		} else if(input<-1.0){
 			return -1.0;
 		} 
-		return input;//(Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input)); 
+		return input; 
 	}
 
 	public double activationDerivative(double input) {
