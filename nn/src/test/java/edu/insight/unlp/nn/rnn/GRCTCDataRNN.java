@@ -198,8 +198,8 @@ public class GRCTCDataRNN {
 		do {
 			epoch++;
 			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
-			int ce = ((int)(Math.exp(-trainingError)*100));
-			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
+			//int ce = ((int)(Math.exp(-trainingError)*100));
+			System.out.println("epoch "+epoch+" training error: "+trainingError);
 			correctlyClassified = test(nn, testData);
 			int classIndex = 0;
 			for(int m=0; m<predictedCorrectClassTotals.length; m++){

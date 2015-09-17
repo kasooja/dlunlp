@@ -79,8 +79,8 @@ public class XorRNN {
 		do {
 			epoch++;
 			double trainingError = nn.sgdTrainSeq(trainingSeq, 0.04, batchSize, false, 0.4);
-			int ce = ((int)(Math.exp(-trainingError)*100));
-			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
+			//int ce = ((int)(Math.exp(-trainingError)*100));
+			System.out.println("epoch "+epoch+" training error: "+trainingError);
 			correctlyClassified = test(nn, testData, testTargets);
 			System.out.println((int)(correctlyClassified*100)+"% correctly classified");
 		} while (correctlyClassified < 0.9);

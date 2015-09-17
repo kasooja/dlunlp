@@ -178,8 +178,8 @@ public class SuggestionDataRNN {
 		do {
 			epoch++;
 			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
-			int ce = ((int)(Math.exp(-trainingError)*100));
-			System.out.println("epoch "+epoch+" training error: "+trainingError+" (confidence "+ce+"%)");
+			//int ce = ((int)(Math.exp(-trainingError)*100));
+			System.out.println("epoch "+epoch+" training error: "+trainingError);
 			correctlyClassified = test(nn, testData);
 			for(int classIndex=0; classIndex<predictedCorrectClassTotals.length; classIndex++){
 				System.out.print("Class " + (classIndex+1) + ": ");
