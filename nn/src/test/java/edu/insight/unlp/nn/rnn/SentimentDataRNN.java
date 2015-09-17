@@ -25,7 +25,7 @@ public class SentimentDataRNN {
 
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
-	private static Word2Vec vec = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	private static Word2Vec vec = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	//private static Word2Vec vec = null; 
 	private static double[] actualClassTestTotals = new double[2]; //last one to hold the overall totals
@@ -137,8 +137,8 @@ public class SentimentDataRNN {
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
-		String posSentDataDirPath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/rt-polaritydata/rt-polarity.pos";
-		String negSentDataDirPath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/rt-polaritydata/rt-polarity.neg";
+		String posSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.pos";
+		String negSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.neg";
 		double[] posTarget = new double[]{0, 1};
 		double[] negTarget = new double[]{1, 0};
 		readData(posSentDataDirPath, posTarget);

@@ -74,7 +74,6 @@ public class XorRNN {
 				counter++;
 			}		
 		}
-
 		System.err.println("done.");
 		int epoch = 0;
 		double correctlyClassified;

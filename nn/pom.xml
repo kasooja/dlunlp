@@ -33,7 +33,7 @@
 			<artifactId>weka</artifactId>
 			<version>3.7.10</version>
 			<scope>system</scope>
-			<systemPath>/Users/kartik/git/dlunlp/nn/src/main/resources/lib/weka-3.7.10.jar</systemPath>
+			<systemPath>${basedir}/src/main/resources/lib/weka-3.7.10.jar</systemPath>
 		</dependency>
 
 

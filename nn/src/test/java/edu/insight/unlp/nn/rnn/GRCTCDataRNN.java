@@ -32,7 +32,7 @@ public class GRCTCDataRNN {
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	private static Word2Vec vec = null; 
-	//SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	//SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	private static double[] actualClassTotals = new double[9]; 
 	private static double[] actualClassTrainingTotals = new double[9]; 
 	private static double[] predictedCorrectClassTotals = new double[9]; 
@@ -180,11 +180,11 @@ public class GRCTCDataRNN {
 		nn.initializeNN();
 
 		System.err.print("Reading serialized word vectors...");
-		tokenVectorMap = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/grctcDataWordVectorMap.vecMap"));
+		tokenVectorMap = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/grctc/grctcDataWordVectorMap.vecMap"));
 		System.err.print("Done");
 
 		System.err.print("Reading data...");
-		String grctcDataFilePath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/USUKAMLAll9Labels_all.arff";
+		String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
 		readData(grctcDataFilePath);
 		System.err.println("done.");
 

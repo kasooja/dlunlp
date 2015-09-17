@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
+//import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
@@ -29,7 +29,7 @@ public class SuggestionDataRNN {
 
 	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
 	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
-	private static Word2Vec vec = SerializationUtils.readObject(new File("/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/word2vecElectronics.model"));
+	private static Word2Vec vec = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	//private static Word2Vec vec = null; 
 	private static double[] actualClassTotals = new double[3]; //last one to hold the overall totals
@@ -168,7 +168,7 @@ public class SuggestionDataRNN {
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
-		String electronicsDataFilePath = "/Users/kartik/git/dlunlp/nn/src/main/resources/data/Sequence/electronics.csv";
+		String electronicsDataFilePath = "src/test/resources/data/Sequence/suggestion/electronics.csv";
 		readData(electronicsDataFilePath);
 		System.out.println("TestDataSize: " + testData.size());
 		System.out.println("TrainingDataSize: " + trainingData.size());
