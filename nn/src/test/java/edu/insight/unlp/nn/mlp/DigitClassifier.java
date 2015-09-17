@@ -12,7 +12,6 @@ import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.ReLU;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.common.InputLayer;
-import edu.insight.unlp.nn.common.SoftMaxLayer;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 
 public class DigitClassifier {
