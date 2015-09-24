@@ -2,7 +2,7 @@ package edu.insight.unlp.nn.af;
 
 import edu.insight.unlp.nn.ActivationFunction;
 
-public class HardTanh implements ActivationFunction {
+public class HardTanh extends ActivationFunction {
 
 	public double activation(double input) {
 		if(input>1.0){

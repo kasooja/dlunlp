@@ -1,8 +1,10 @@
 package edu.insight.unlp.nn.af;
 
+import java.util.stream.IntStream;
+
 import edu.insight.unlp.nn.ActivationFunction;
 
-public class Tanh implements ActivationFunction {
+public class Tanh extends ActivationFunction {
 
 	public double activation(double input) {
 		if(input>20.0){
@@ -10,11 +12,12 @@ public class Tanh implements ActivationFunction {
 		} else if(input<-20.0){
 			return -1.0;
 		}
-		return (Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input)); 
+		return Math.tanh(input); //(Math.exp(input) - Math.exp(-input)) / (Math.exp(input) + Math.exp(-input)); 
 	}
 
 	public double activationDerivative(double input) {
-		return 1 - (Math.pow(activation(input), 2));
+		double coshx = Math.cosh(input);
+		double denom = (Math.cosh(2*input) + 1);
+		return 4 * coshx * coshx / (denom * denom); // 1 - (Math.pow(activation(input), 2));
 	}
-
 }

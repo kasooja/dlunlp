@@ -2,24 +2,26 @@ package edu.insight.unlp.nn.af;
 
 import edu.insight.unlp.nn.ActivationFunction;
 
-public class ReLU implements ActivationFunction {
+public class ReLU extends ActivationFunction {
 
+	public static double slope = 0.05;
+	
 	public double activation(double input) {
-		if(input<0){
-			return 0.01 * input; 
-		} else {
+		if (input >= 0) {
 			return input;
 		}
-		//return Math.log(1 + Math.exp(input));
+		else {
+			return input * slope;
+		}
 	}
 
 	public double activationDerivative(double input) {
-		if(input<0){
-			return 0.01;
-		} else {
+		if (input >= 0) {
 			return 1.0;
 		}
-		//return 1 / (1 + Math.exp(-input));
+		else {
+			return slope;
+		}
 	}
 
 }
