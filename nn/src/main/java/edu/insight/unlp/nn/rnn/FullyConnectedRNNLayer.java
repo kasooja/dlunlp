@@ -68,16 +68,6 @@ public class FullyConnectedRNNLayer extends NNLayer {
 		return null;
 	}
 
-
-	public double[] output(double[] input) {
-		double[] signals = computeSignals(input);
-		double[] activations = new double[numUnits];
-		IntStream.range(0, signals.length).forEach(i -> activations[i] = af.activation(signals[i]));
-		activationCounter++;
-		lastActivations.put(activationCounter, activations);
-		return activations;
-	}
-
 	public double[] computeSignals(double[] input){
 		double outputs[] = new double[numUnits];
 		for (int i = 0; i < outputs.length; i++) {
