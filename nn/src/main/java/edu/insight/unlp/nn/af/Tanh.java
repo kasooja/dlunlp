@@ -1,7 +1,5 @@
 package edu.insight.unlp.nn.af;
 
-import java.util.stream.IntStream;
-
 import edu.insight.unlp.nn.ActivationFunction;
 
 public class Tanh extends ActivationFunction {
