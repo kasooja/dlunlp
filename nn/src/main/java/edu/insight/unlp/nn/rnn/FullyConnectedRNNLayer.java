@@ -1,7 +1,6 @@
 package edu.insight.unlp.nn.rnn;
 
 import java.util.Map;
-import java.util.stream.IntStream;
 
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
