@@ -9,7 +9,9 @@ import edu.insight.unlp.nn.ErrorFunction;
 public class SquareErrorFunction implements ErrorFunction {
 
 	public double[] error(double[] actual, double[] predicted) {
-		double[] error = new double[actual.length+1];
+		double[] error = new double[predicted.length+1];
+		if(actual==null)
+			return error;
 		double squareError = 0.0;
 		for (int i=0; i<predicted.length; i++) {
 			error[i] = (predicted[i]-actual[i]);

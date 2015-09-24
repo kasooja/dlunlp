@@ -9,25 +9,23 @@ import java.util.List;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-
 //import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
-import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
-import edu.insight.unlp.nn.af.ReLU;
+import edu.insight.unlp.nn.RNN;
+import edu.insight.unlp.nn.af.Linear;
 import edu.insight.unlp.nn.af.Sigmoid;
-import edu.insight.unlp.nn.common.InputLayer;
-import edu.insight.unlp.nn.common.SequenceM21;
-import edu.insight.unlp.nn.common.SoftMaxLayer;
+import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
+import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
 
 public class SuggestionDataRNN {
 
-	private static List<SequenceM21> trainingData = new ArrayList<SequenceM21>();
-	private static List<SequenceM21> testData = new ArrayList<SequenceM21>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
+	private static List<Sequence> trainingData = new ArrayList<Sequence>();
+	private static List<Sequence> testData = new ArrayList<Sequence>();// = new double[][]{new double[]{0}, new double[]{1}, new double[]{1}, new double[]{1}};
 	private static Word2Vec vec = SerializationUtils.readObject(new File("src/test/resources/data/Sequence/suggestion/word2vecElectronics.model"));
 	//private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
 	//private static Word2Vec vec = null; 
@@ -36,41 +34,42 @@ public class SuggestionDataRNN {
 	private static double[] predictedCorrectClassTotals = new double[3]; //last one to hold the overall totals
 	private static double[] predictedTotalClassTotals = new double[3]; //last one to hold the overall totals
 
-//	static {
-//		try {
-//			vec = WordVectorSerializer.loadGoogleModel(gModel, true);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}	
-//	}
+	//	static {
+	//		try {
+	//			vec = WordVectorSerializer.loadGoogleModel(gModel, true);
+	//		} catch (IOException e) {
+	//			e.printStackTrace();
+	//		}	
+	//	}
 
-	public static double test(NN network, List<SequenceM21> testData) {
+	public static double test(RNN network, List<Sequence> testData) {
 		for(int m=0; m<predictedCorrectClassTotals.length; m++){
 			predictedCorrectClassTotals[m] = 0;
 			predictedTotalClassTotals[m] = 0;
 		}
 		int correct = 0;
-		for(SequenceM21 seq : testData){
-			double[] output = network.outputSequence(seq.inputSeq);
-			double[] actualOutput = seq.target;
+		for(Sequence seq : testData){
+			double[][] output = network.output(seq.inputSeq);
+			double[] networkOutput = output[output.length -1];
+			double[] actualOutput = seq.target[seq.target.length-1];
 			int winnerIndex = 0;
 			double max = Double.MIN_VALUE;
-			for(int i=0; i<output.length; i++) {
-				if(output[i]>max){
-					max = output[i];
+			for(int i=0; i<networkOutput.length; i++) {
+				if(networkOutput[i]>max){
+					max = networkOutput[i];
 					winnerIndex = i; 
 				}
 			}
-			for(int i=0; i<output.length; i++){
+			for(int i=0; i<networkOutput.length; i++){
 				if(i==winnerIndex){
-					output[i] = 1.0;
+					networkOutput[i] = 1.0;
 				} else {
-					output[i] = 0.0;
+					networkOutput[i] = 0.0;
 				}
 			}
 			boolean equal = true;
-			for(int i=0; i<output.length; i++){
-				if(output[i] != actualOutput[i]){
+			for(int i=0; i<networkOutput.length; i++){
+				if(networkOutput[i] != actualOutput[i]){
 					equal = false;
 				}
 			}
@@ -79,7 +78,7 @@ public class SuggestionDataRNN {
 				correct++;
 				predictedCorrectClassTotals[winnerIndex]++;  
 			}
-			network.resetActivationCounter();				
+			network.resetActivationCounter(false);				
 		}
 		return ((double)correct)/testData.size();
 	}
@@ -124,7 +123,12 @@ public class SuggestionDataRNN {
 				}
 				double[][] inputSeq = new double[inputWordVectors.size()][];
 				inputSeq = inputWordVectors.toArray(inputSeq);
-				SequenceM21 seq = new SequenceM21(inputSeq, target);
+				double[][] targetSeq = new double[inputWordVectors.size()][];
+				for(int k=0; k<targetSeq.length; k++) {
+					targetSeq[k] = target; //make it null, if you just want to use the error at the last step
+				}
+				targetSeq[targetSeq.length-1] = target;
+				Sequence seq = new Sequence(inputSeq, targetSeq);
 				int[] randArray = new Random().ints(1, 0, 16).toArray();
 				if(randArray[0] == 0){
 					testData.add(seq);
@@ -150,20 +154,17 @@ public class SuggestionDataRNN {
 	}
 
 	public static void main(String[] args) {
-		RNN nn = new RNN(new SquareErrorFunction());
+		RNNImpl nn = new RNNImpl(new SquareErrorFunction());
 		//RNN nn = new RNN(new CrossEntropyErrorFunction());
-		double momentum = 0.9;
-		SoftMaxLayer softmaxLayer = new SoftMaxLayer(3, nn);
-		FullyConnectedRNNLayer preOutputLayer = new FullyConnectedRNNLayer(3, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new ReLU(), nn);
-		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new ReLU(), nn);
-		InputLayer inputLayer = new InputLayer(10);
+		FullyConnectedLayer outputLayer = new FullyConnectedLayer(3, new Sigmoid(), nn);
+		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new Sigmoid(), nn);
+		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
+		FullyConnectedLayer inputLayer = new FullyConnectedLayer(10, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
 		layers.add(hiddenLayer1);
-		layers.add(preOutputLayer);
-		layers.add(softmaxLayer);
+		layers.add(outputLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
@@ -174,10 +175,9 @@ public class SuggestionDataRNN {
 		System.err.println("done.");
 		int epoch = 0;
 		double correctlyClassified;
-		int batchSize = trainingData.size()/100;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrainSeq(trainingData, 0.001, batchSize, false, momentum);
+			double trainingError = nn.sgdTrain(trainingData, 0.001, true);
 			//int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError);
 			correctlyClassified = test(nn, testData);
