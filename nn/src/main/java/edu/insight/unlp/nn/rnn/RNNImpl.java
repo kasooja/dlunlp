@@ -31,29 +31,6 @@ public class RNNImpl implements RNN {
 		}
 	}
 
-	//	public double sgdTrain(List<SequenceM21> training, double learningRate, boolean shuffle){
-	//		double overallError = 0.0;
-	//		if(shuffle){
-	//			Collections.shuffle(training);
-	//		}
-	//		resetActivationCounter();
-	//		for(SequenceM21 seq : training){
-	//			double[][] inputSeq = seq.inputSeq;
-	//			double[] target = seq.target;
-	//			ff(inputSeq);
-	//			double[][] eg = new double[networkOutput.length][];
-	//			for(int i=0; i<networkOutput.length; i++){
-	//				eg[i] = ef.error(target, networkOutput[i]);
-	//			}
-	//			double[] bp = bp(eg);
-	//			double error = bp[bp.length-1];
-	//			overallError = overallError + error;
-	//			update(learningRate);
-	//			resetActivationCounter();
-	//		}
-	//		return overallError / training.size();
-	//	}
-
 	public double sgdTrain(List<Sequence> training, double learningRate, boolean shuffle){
 		double overallError = 0.0;
 		if(shuffle){
@@ -76,23 +53,6 @@ public class RNNImpl implements RNN {
 		}
 		return overallError / training.size();
 	}
-
-
-	//	public double sgdTrainSeqErrorAtLast(List<Sequence> training, double learningRate, int batchSize, boolean shuffle, double momentum){
-	//		double overallError = 0.0;
-	//		for(SequenceM seq : training){
-	//			double[][] inputSeq = seq.inputSeq;
-	//			double[] target = seq.target;
-	//			double[] networkOutput = ff(inputSeq);
-	//			double[] eg = ef.error(target, networkOutput);
-	//			eg = bp(eg);
-	//			double error = eg[networkOutput.length];
-	//			overallError = overallError + error;
-	//			update(learningRate, momentum);
-	//			resetActivationCounter();
-	//		}
-	//		return overallError / training.size();
-	//	}
 
 	private double[] ff(double[][] inputSeq){
 		double[] finalActivations = null;
@@ -126,18 +86,6 @@ public class RNNImpl implements RNN {
 		return stageErrorGradient;
 	}
 
-	private double[] bp(double[] errorGradient){
-		int o = errorGradient.length;
-		for(int j=layers.get(layers.size()-1).getActivationCounterVal(); j>=0; j--){
-			for(int i = layers.size() - 1; i>0; i--){
-				errorGradient = layers.get(i).errorGradient(errorGradient);
-			}
-			double totalError = errorGradient[errorGradient.length-1];
-			errorGradient = new double[o]; errorGradient[o-1] = totalError;
-		}
-		return errorGradient;
-	}
-
 	public void resetActivationCounter(boolean training){
 		for(NNLayer layer : layers){
 			layer.resetActivationCounter(training);
@@ -167,17 +115,6 @@ public class RNNImpl implements RNN {
 	public List<NNLayer> getLayers() {
 		return layers;
 	}
-
-	//	public double[] output(double[][] inputSeq) {
-	//		double[] result = null;
-	//		for(double[] input : inputSeq){
-	//			result = input;		
-	//			for(NNLayer layer : layers){
-	//				result = layer.computeActivations(result, false);
-	//			}
-	//		}
-	//		return result;
-	//	}
 
 	@Override
 	public double[][] output(double[][] inputSeq) {
