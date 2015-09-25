@@ -2,10 +2,10 @@ package edu.insight.unlp.nn.lstm;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.af.Tanh;
 import edu.insight.unlp.nn.common.WeightInitializer;
 
 public class FullyConnectedLSTMLayer extends NNLayer {
@@ -13,16 +13,14 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	private ActivationFunction afInputGate = new Sigmoid();
 	private ActivationFunction afForgetGate = new Sigmoid();
 	private ActivationFunction afOutputGate = new Sigmoid();
-
+	private ActivationFunction afCellOutput = new Tanh();
+	
 	private double[] inputGateWeights, inputGateDeltas;
 	private double[] forgetGateWeights, forgetGateDeltas;
 	private double[] outputGateWeights, outputGateDeltas;
-
+	
 	private Map<Integer, double[]> contextLastActivations;
-
-	//ActivationFunction fCellInput = new TanhUnit();
-	//ActivationFunction fCellOutput = new TanhUnit();
-
+	
 	@Override
 	public double[] errorGradient(double[] input) {
 		return null;
@@ -81,7 +79,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		}
 
 		//compute hidden state as gated, saturated cell activations
-		double[] outputSquash = afOutputGate.activation(activations);
+		double[] outputSquash = afCellOutput.activation(activations);
 		double[] output = elementMul(outputGateActivations, outputSquash);
 
 		//rollover activations for next iteration
@@ -94,6 +92,8 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	public void initializeLayer(int previousLayerUnits) {
 		super.initializeLayer(previousLayerUnits, true);	
 
+		af = new Tanh();//cell Input
+		
 		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
 
 		contextLastActivations = new HashMap<Integer, double[]>();
