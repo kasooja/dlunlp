@@ -12,7 +12,7 @@ public abstract class NNLayer {
 	protected int activationCounter = -1;
 	protected ActivationFunction af;
 	protected Map<Integer, double[]> lastActivationDerivatives;
-	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback from the last example, RNN	
+	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
 	protected int numUnits;
 	protected int prevLayerUnits;
 	protected double[] weights; //keeps the weights of the connections from the previous layer
