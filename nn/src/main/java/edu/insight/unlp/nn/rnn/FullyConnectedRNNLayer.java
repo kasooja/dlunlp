@@ -67,22 +67,6 @@ public class FullyConnectedRNNLayer extends NNLayer {
 		return null;
 	}
 
-//	public double[] computeSignals(double[] input){
-//		
-//		double outputs[] = new double[numUnits];
-//		for (int i = 0; i < outputs.length; i++) {
-//			outputs[i] = 1 * weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs
-//			int j = 0;
-//			for (j = 0; j < input.length; j++) {
-//				outputs[i] += input[j] * weights[i * (input.length + 1 + numUnits) + j + 1];
-//			}
-//			for (int m = j; m < numUnits+j; m++) {
-//				outputs[i] += lastActivations.get(activationCounter)[m-j] * weights[i * (input.length + 1 + numUnits) + m + 1];
-//			}
-//		}
-//		return outputs;
-//	}
-
 	public double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations) {
 		double signals[] = new double[numUnits];
 		for (int i = 0; i < signals.length; i++) {
