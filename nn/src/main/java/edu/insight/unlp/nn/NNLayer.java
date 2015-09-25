@@ -66,7 +66,7 @@ public abstract class NNLayer {
 	}
 	
 	public double[] computeActivations(double[] input, boolean training) {
-		double[] signals = computeSignals(input);
+		double[] signals = computeSignals(input, weights, lastActivations);
 		double[] derivatives = new double[numUnits];
 		double[] activations = new double[numUnits];
 		activationCounter++;
@@ -101,10 +101,7 @@ public abstract class NNLayer {
 	}
 
 	public abstract double[] errorGradient(double[] input);
-
-	public abstract double[] computeSignals(double[] input);
-	
+	public abstract double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations);
 	public abstract void initializeLayer(int previousLayerUnits);
-
 
 }

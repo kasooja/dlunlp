@@ -38,7 +38,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		return null;
 	}
 
-	private double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations) {
+	public double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations) {
 		double signals[] = new double[numUnits];
 		for (int i = 0; i < signals.length; i++) {
 			signals[i] = 1 * weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs
@@ -52,7 +52,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		}
 		return signals;
 	}
-
+	
 	private double[] elementMul(double[] one, double[] two){
 		double[] result = new double[numUnits];
 		for(int i=0; i<numUnits; i++){
@@ -62,7 +62,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	}
 
 	@Override
-	public double[] computeSignals(double[] input) {
+	public double[] computeActivations(double[] input, boolean training) {
 		//http://colah.github.io/posts/2015-08-Understanding-LSTMs/
 		//forget gate
 		double forgetGateSignals[] = computeSignals(input, forgetGateWeights, lastActivations);
@@ -93,8 +93,14 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
 		double[] output = elementMul(outputGateActivations, cellStateSquashing);
 
+		activationCounter++;
 		lastActivations.put(activationCounter, output);
 		cellStateLastActivations.put(activationCounter, cellStateActivations);
+
+		if(training && prevLayerUnits != -1){
+			//IntStream.range(0, signals.length).forEach(i -> derivatives[i] = af.activationDerivative(signals[i]));
+			//lastActivationDerivatives.put(activationCounter, derivatives);
+		}
 		return output;
 	}
 

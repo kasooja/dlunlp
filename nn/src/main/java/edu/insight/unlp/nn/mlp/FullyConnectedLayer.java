@@ -1,4 +1,6 @@
 package edu.insight.unlp.nn.mlp;
+import java.util.Map;
+
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
@@ -40,7 +42,7 @@ public class FullyConnectedLayer extends NNLayer {
 		return null;
 	}
 
-	public double[] computeSignals(double[] input){
+	public double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations){ //MLP does not require its activations for feedback, so not used in the method for computing signals
 		if(prevLayerUnits == -1){
 			return input;
 		}
