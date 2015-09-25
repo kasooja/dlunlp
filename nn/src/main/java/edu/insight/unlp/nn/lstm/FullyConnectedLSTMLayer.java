@@ -2,7 +2,9 @@ package edu.insight.unlp.nn.lstm;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import edu.insight.unlp.nn.ActivationFunction;
+import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
@@ -19,7 +21,17 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	private double[] forgetGateWeights, forgetGateDeltas;
 	private double[] outputGateWeights, outputGateDeltas;
 	
-	private Map<Integer, double[]> contextLastActivations;
+	private Map<Integer, double[]> cellStateLastActivations;
+	
+	public FullyConnectedLSTMLayer(int numUnits, ActivationFunction af, NN nn) {
+		this.numUnits = numUnits;
+		this.af = af;
+		this.nn = nn;
+	}
+
+	public FullyConnectedLSTMLayer(int numUnits, NN nn) {
+		new FullyConnectedLSTMLayer(numUnits, new Tanh(), nn);
+	}
 	
 	@Override
 	public double[] errorGradient(double[] input) {
@@ -51,53 +63,49 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 
 	@Override
 	public double[] computeSignals(double[] input) {
-		//input gate
-		double inputGateSignals[] = computeSignals(input, inputGateWeights, contextLastActivations);
-		double[] inputGateActivations = afInputGate.activation(inputGateSignals);
-
+		//http://colah.github.io/posts/2015-08-Understanding-LSTMs/
 		//forget gate
-		double forgetGateSignals[] = computeSignals(input, forgetGateWeights, contextLastActivations);
+		double forgetGateSignals[] = computeSignals(input, forgetGateWeights, lastActivations);
 		double[] forgetGateActivations = afForgetGate.activation(forgetGateSignals);
 
-		//output gate
-		double outputGateSignals[] = computeSignals(input, outputGateWeights, contextLastActivations);
-		double[] outputGateActivations = afOutputGate.activation(outputGateSignals);
+		//input gate
+		double inputGateSignals[] = computeSignals(input, inputGateWeights, lastActivations);
+		double[] inputGateActivations = afInputGate.activation(inputGateSignals);
 
-		//write operation on cells
-		double[] cellInputSignals = computeSignals(input, weights, contextLastActivations);
-		double[] cellInputActivations = af.activation(cellInputSignals);
-
-		//compute new cell activation
-		double[] lastActivation = lastActivations.get(activationCounter);
-
-		double[] retainCell = elementMul(forgetGateActivations, lastActivation);
-		double[] writeCell = elementMul(inputGateActivations, cellInputActivations);	
-
-		double[] activations = new double[numUnits];
+		// C̃t (see Colah blog), tanh layer, default value of af is tanh, this is the computation of new candidate vector C̃t to be added to the cell state. 
+		double[] cellStateInputSignals = computeSignals(input, weights, lastActivations);  
+		double[] cellStateInputActivations = af.activation(cellStateInputSignals);
+		
+		//It’s now time to update the old cell state, Ct−1, into the new cell state Ct
+		double[] lastCellStateActivation = cellStateLastActivations.get(activationCounter);
+		double[] notToForget = elementMul(forgetGateActivations, lastCellStateActivation);
+		double[] cellInput = elementMul(inputGateActivations, cellStateInputActivations);	
+		double[] cellStateActivations = new double[numUnits];
 		for(int i=0; i<numUnits; i++){
-			activations[i] = retainCell[i] + writeCell[i];
+			cellStateActivations[i] = notToForget[i] + cellInput[i];
 		}
 
-		//compute hidden state as gated, saturated cell activations
-		double[] outputSquash = afCellOutput.activation(activations);
-		double[] output = elementMul(outputGateActivations, outputSquash);
+		//output gate
+		double outputGateSignals[] = computeSignals(input, outputGateWeights, lastActivations);  //lastActivations stores the step outputs of the lstm block 
+		double[] outputGateActivations = afOutputGate.activation(outputGateSignals);
 
-		//rollover activations for next iteration
-		lastActivations.put(activationCounter, activations);
-		contextLastActivations.put(activationCounter, output);
+		//computing lstm block output
+		double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
+		double[] output = elementMul(outputGateActivations, cellStateSquashing);
+
+		lastActivations.put(activationCounter, output);
+		cellStateLastActivations.put(activationCounter, cellStateActivations);
 		return output;
 	}
 
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
 		super.initializeLayer(previousLayerUnits, true);	
-
-		af = new Tanh();//cell Input
 		
 		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
 
-		contextLastActivations = new HashMap<Integer, double[]>();
-		contextLastActivations.put(-1, new double[numUnits]);
+		cellStateLastActivations = new HashMap<Integer, double[]>();
+		cellStateLastActivations.put(-1, new double[numUnits]);
 
 		inputGateWeights = new double[totalWeightParams];
 		WeightInitializer.randomInitializeLeCun(inputGateWeights);//(weights, 0.2);

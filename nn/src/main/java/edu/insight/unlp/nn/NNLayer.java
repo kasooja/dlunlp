@@ -13,9 +13,9 @@ public abstract class NNLayer {
 	protected ActivationFunction af;
 	protected Map<Integer, double[]> lastActivationDerivatives;
 	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
-	protected int numUnits;
+	protected int numUnits; 
 	protected int prevLayerUnits;
-	protected double[] weights; //keeps the weights of the connections from the previous layer
+	protected double[] weights; //keeps the weights of the connections from the previous layer, in lstm, cellStateInput weights
 	protected double[] deltas;
 	protected double[] prevDeltas; // stepCache, explore more
 	public static double decayRate = 0.999;
