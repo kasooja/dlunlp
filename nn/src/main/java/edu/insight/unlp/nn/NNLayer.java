@@ -17,7 +17,7 @@ public abstract class NNLayer {
 	protected int prevLayerUnits;
 	protected double[] weights; //keeps the weights of the connections from the previous layer, in lstm, cellStateInput weights
 	protected double[] deltas;
-	protected double[] prevDeltas; // stepCache, explore more
+	protected double[] stepCache; // stepCache, explore more, it is for per parameter RMS weight update
 	public static double decayRate = 0.999;
 	public static double smoothEpsilon = 1e-8;
 	public static double gradientClipValue = 5;
@@ -39,15 +39,14 @@ public abstract class NNLayer {
 		activationCounter = -1;
 		if(training && prevLayerUnits!=-1){
 			deltas = new double[weights.length];
-			prevDeltas = new double[weights.length];
+			stepCache = new double[weights.length];
 		}
 	}
 
-
-	public void update(double learningRate) {
+	public void update(double learningRate, double[] weights, double[] deltas, double[] stepCache){
 		for(int i=0; i<weights.length; i++) {
 			double mdwi = deltas[i]; // rmsprop adaptive learning rate
-			prevDeltas[i] = prevDeltas[i] * decayRate + (1 - decayRate) * mdwi * mdwi; 
+			stepCache[i] = stepCache[i] * decayRate + (1 - decayRate) * mdwi * mdwi; 
 
 			if (mdwi > gradientClipValue) {			// gradient clip
 				mdwi = gradientClipValue;
@@ -56,12 +55,16 @@ public abstract class NNLayer {
 				mdwi = -gradientClipValue;
 			}
 			// update (and regularize)
-			weights[i] += - learningRate * mdwi / Math.sqrt(prevDeltas[i] + smoothEpsilon) - regularization * weights[i];
+			weights[i] += - learningRate * mdwi / Math.sqrt(stepCache[i] + smoothEpsilon) - regularization * weights[i];
 		}
 		//	IntStream.range(0, weights.length).forEach(i -> weights[i] = weights[i] - learningRate * deltas[i] - momentum * prevDeltas[i]);
 		//	prevDeltas  = deltas;
 	}
 
+	public void update(double learningRate){
+		update(learningRate, weights, deltas, stepCache);
+	}
+	
 	public double[] computeActivations(double[] input, boolean training) {
 		double[] signals = computeSignals(input);
 		double[] derivatives = new double[numUnits];
@@ -89,7 +92,7 @@ public abstract class NNLayer {
 		weights = new double[totalWeightParams];
 		WeightInitializer.randomInitializeLeCun(weights);//(weights, 0.2);
 		deltas = new double[weights.length];
-		prevDeltas = new double[weights.length];
+		stepCache = new double[weights.length];
 		lastActivationDerivatives = new HashMap<Integer, double[]>();
 	}
 	

@@ -16,13 +16,13 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	private ActivationFunction afForgetGate = new Sigmoid();
 	private ActivationFunction afOutputGate = new Sigmoid();
 	private ActivationFunction afCellOutput = new Tanh();
-	
-	private double[] inputGateWeights, inputGateDeltas;
-	private double[] forgetGateWeights, forgetGateDeltas;
-	private double[] outputGateWeights, outputGateDeltas;
-	
+
+	private double[] inputGateWeights, inputGateDeltas, inputGateStepCache;
+	private double[] forgetGateWeights, forgetGateDeltas, forgetGateStepCache;
+	private double[] outputGateWeights, outputGateDeltas, outputGateStepCache;
+
 	private Map<Integer, double[]> cellStateLastActivations;
-	
+
 	public FullyConnectedLSTMLayer(int numUnits, ActivationFunction af, NN nn) {
 		this.numUnits = numUnits;
 		this.af = af;
@@ -30,9 +30,9 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	}
 
 	public FullyConnectedLSTMLayer(int numUnits, NN nn) {
-		new FullyConnectedLSTMLayer(numUnits, new Tanh(), nn);
+		this(numUnits, new Tanh(), nn);
 	}
-	
+
 	@Override
 	public double[] errorGradient(double[] input) {
 		return null;
@@ -75,7 +75,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		// C̃t (see Colah blog), tanh layer, default value of af is tanh, this is the computation of new candidate vector C̃t to be added to the cell state. 
 		double[] cellStateInputSignals = computeSignals(input, weights, lastActivations);  
 		double[] cellStateInputActivations = af.activation(cellStateInputSignals);
-		
+
 		//It’s now time to update the old cell state, Ct−1, into the new cell state Ct
 		double[] lastCellStateActivation = cellStateLastActivations.get(activationCounter);
 		double[] notToForget = elementMul(forgetGateActivations, lastCellStateActivation);
@@ -101,7 +101,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
 		super.initializeLayer(previousLayerUnits, true);	
-		
+
 		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
 
 		cellStateLastActivations = new HashMap<Integer, double[]>();
@@ -120,4 +120,26 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		forgetGateDeltas = new double[forgetGateWeights.length];
 
 	}
+
+	public void resetActivationCounter(boolean training){
+		super.resetActivationCounter(training);
+		if(training && prevLayerUnits!=-1){
+			inputGateDeltas = new double[inputGateWeights.length];
+			inputGateStepCache = new double[inputGateWeights.length];
+
+			forgetGateDeltas = new double[forgetGateWeights.length];
+			forgetGateStepCache = new double[forgetGateWeights.length];
+
+			outputGateDeltas = new double[outputGateWeights.length];
+			outputGateStepCache = new double[outputGateWeights.length];
+		}
+	}
+
+	public void update(double learningRate) {
+		super.update(learningRate, forgetGateWeights, forgetGateDeltas, forgetGateStepCache);
+		super.update(learningRate, inputGateWeights, inputGateDeltas, inputGateStepCache);
+		super.update(learningRate, weights, deltas, stepCache);
+		super.update(learningRate, outputGateWeights, outputGateDeltas, outputGateStepCache);
+	}
+
 }

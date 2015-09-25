@@ -1,60 +1,131 @@
 package edu.insight.unlp.nn.lstm;
 
+import java.util.Collections;
 import java.util.List;
 
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.RNN;
 import edu.insight.unlp.nn.common.Sequence;
 
 public class LSTM implements RNN {
 
+	public List<NNLayer> layers;
+	public ErrorFunction ef;
+	public double[][] networkOutput;
+
+	public LSTM(ErrorFunction ef){
+		this.ef = ef;
+	}
+
 	@Override
 	public void update(double learningRate) {
-		// TODO Auto-generated method stub
-		
+		for(NNLayer layer : layers){
+			int index = layers.indexOf(layer);
+			if(index!=layers.size()-1){
+				layers.get(index+1).update(learningRate);
+			}
+		}
 	}
 
 	@Override
 	public int numOutputUnits() {
-		// TODO Auto-generated method stub
-		return 0;
+		return layers.get(layers.size()-1).numNeuronUnits();
+	}
+
+	@Override
+	public void setLayers(List<edu.insight.unlp.nn.NNLayer> layers) {
+		this.layers = layers;
 	}
 
 	@Override
 	public void initializeNN() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void setLayers(List<NNLayer> layers) {
-		// TODO Auto-generated method stub
-		
+		int prevLayerUnits = -1;
+		for(int i=0; i<layers.size(); i++){
+			layers.get(i).initializeLayer(prevLayerUnits);
+			prevLayerUnits = layers.get(i).numNeuronUnits();
+		}
 	}
 
 	@Override
 	public List<NNLayer> getLayers() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void resetActivationCounter(boolean training) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public double sgdTrain(List<Sequence> training, double learningRate,
-			boolean shuffle) {
-		// TODO Auto-generated method stub
-		return 0;
+		return layers;
 	}
 
 	@Override
 	public double[][] output(double[][] inputSeq) {
-		// TODO Auto-generated method stub
-		return null;
+		double[][] target = new double[inputSeq.length][];
+		double[] result = null;
+		int i = 0;
+		for(double[] input : inputSeq){
+			result = input;		
+			for(NNLayer layer : layers){
+				result = layer.computeActivations(result, false);
+			}
+			target[i++] = result;
+		}
+		return target;
+	}
+
+	public void resetActivationCounter(boolean training){
+		for(NNLayer layer : layers){
+			layer.resetActivationCounter(training);
+		}
+	}
+
+	public double sgdTrain(List<Sequence> training, double learningRate, boolean shuffle){
+		double overallError = 0.0;
+		if(shuffle){
+			Collections.shuffle(training);
+		}
+		resetActivationCounter(true);
+		for(Sequence seq : training){
+			double[][] inputSeq = seq.inputSeq;
+			double[][] target = seq.target;
+			ff(inputSeq);
+			double[][] eg = new double[networkOutput.length][];
+			for(int i=0; i<networkOutput.length; i++){
+				eg[i] = ef.error(target[i], networkOutput[i]);
+			}
+			double[] bp = bp(eg);
+			double error = bp[bp.length-1];
+			overallError = overallError + error;
+			update(learningRate);
+			resetActivationCounter(true);
+		}
+		return overallError / training.size();
+	}
+
+	private double[] ff(double[][] inputSeq){
+		double[] finalActivations = null;
+		networkOutput = new double[inputSeq.length][];
+		int i = 0;
+		for(double[] input : inputSeq){
+			double[] activations = null;
+			activations = input;		
+			for(NNLayer layer : layers){
+				activations = layer.computeActivations(activations, true);
+			}
+			networkOutput[i++] = activations;
+			finalActivations = activations;
+		}
+		return finalActivations;
+	}
+
+	private double[] bp(double[][] errorGradient){
+		int o = errorGradient[0].length-1;
+		double[] stageErrorGradient = null;
+		for(int j=layers.get(layers.size()-1).getActivationCounterVal(); j>=0; j--){
+			stageErrorGradient = errorGradient[j];
+			for(int i = layers.size() - 1; i>0; i--){
+				stageErrorGradient = layers.get(i).errorGradient(stageErrorGradient);
+			}
+			double totalError = stageErrorGradient[stageErrorGradient.length-1];
+			if(j-1>-1){
+				errorGradient[j-1][o] = totalError;
+			}
+		}
+		return stageErrorGradient;
 	}
 
 }
