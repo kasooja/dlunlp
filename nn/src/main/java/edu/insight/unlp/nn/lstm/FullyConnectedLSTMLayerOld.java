@@ -11,7 +11,7 @@ import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
 import edu.insight.unlp.nn.common.WeightInitializer;
 
-public class FullyConnectedLSTMLayer extends NNLayer {
+public class FullyConnectedLSTMLayerOld extends NNLayer {
 
 	private ActivationFunction afInputGate = new Sigmoid();
 	private ActivationFunction afForgetGate = new Sigmoid();
@@ -28,21 +28,18 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 
 	private Map<Integer, double[]> lastOutputGateActivations;
 	private Map<Integer, double[]> lastInputGateActivations;
-	private Map<Integer, double[]> lastForgetGateActivations;
-
 	private Map<Integer, double[]> cellStateLastActivations;
 	private Map<Integer, double[]> lastCellStateInputActivations;
 
-	private double[] nextStageOutputError;
-	private double[] nextStageCellStateError;
+	private double[] nextStageError;
 
-	public FullyConnectedLSTMLayer(int numUnits, ActivationFunction af, NN nn) {
+	public FullyConnectedLSTMLayerOld(int numUnits, ActivationFunction af, NN nn) {
 		this.numUnits = numUnits;
 		this.af = af;
 		this.nn = nn;
 	}
 
-	public FullyConnectedLSTMLayer(int numUnits, NN nn) {
+	public FullyConnectedLSTMLayerOld(int numUnits, NN nn) {
 		this(numUnits, new Tanh(), nn);
 	}
 
@@ -68,34 +65,32 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 
 	public double[] errorGradient(double[] eg) {
 		for(int i=0; i<eg.length-1; i++){
-			eg[i] = eg[i] + nextStageOutputError[i];
+			eg[i] = eg[i] + nextStageError[i];
 		}
-
 		int currentIndex = nn.getLayers().indexOf(this);
 		if(currentIndex!=0){
 			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
-
+		
 			//recomputing it, didnt store, needed for the backprop
 			double[] cellStateActivations = cellStateLastActivations.get(activationCounter);
 			double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
 			//assuming default value of afCellOutput as tanh, so d/dx tanh = 1 - (Math.pow(tanh, 2));
 			double[] cellStateDerivatives = new double[numUnits]; 
 			IntStream.range(0, numUnits).forEach(i -> cellStateDerivatives[i] = 1-(Math.pow(cellStateSquashing[i], 2)));		
-
+		
 			double[] outputGateLambda = new double[numUnits];
 			double[] forgetGateLambda = new double[numUnits];			
 			double[] cellStateInputLambda = new double[numUnits];
 			double[] inputGateLambda = new double[numUnits];
 
 			for(int i=0; i<numUnits; i++){
-				nextStageCellStateError[i] = 0.0; //cell state error transfer not working properly
 				outputGateLambda[i] = eg[i] * lastOutputGateDerivatives.get(activationCounter)[i] * cellStateSquashing[i];
-				forgetGateLambda[i] = (eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i] + nextStageCellStateError[i]) * 
-						cellStateLastActivations.get(activationCounter-1)[i] * lastForgetGateDerivatives.get(activationCounter)[i] ;
-				cellStateInputLambda[i] = (eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i] + nextStageCellStateError[i]) *
-						lastInputGateActivations.get(activationCounter)[i] * lastActivationDerivatives.get(activationCounter)[i];
-				inputGateLambda[i] = (eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i] + nextStageCellStateError[i]) * 
-						lastCellStateInputActivations.get(activationCounter)[i] * lastInputGateDerivatives.get(activationCounter)[i];
+				forgetGateLambda[i] = eg[i] * lastForgetGateDerivatives.get(activationCounter)[i] *
+						cellStateDerivatives[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateLastActivations.get(activationCounter-1)[i];
+				cellStateInputLambda[i] = eg[i] * lastActivationDerivatives.get(activationCounter)[i] * 
+						cellStateDerivatives[i] * lastOutputGateActivations.get(activationCounter)[i] * lastInputGateActivations.get(activationCounter)[i] ;
+				inputGateLambda[i] = eg[i] * lastInputGateDerivatives.get(activationCounter)[i] * cellStateDerivatives[i] *
+						lastOutputGateActivations.get(activationCounter)[i] * lastCellStateInputActivations.get(activationCounter)[i] ;
 			}
 
 			double[] egOutputGate = errorGradient(eg, outputGateLambda, prevLayer.lastActivations().get(activationCounter), 
@@ -122,8 +117,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 
 			finalEgPrevLayer[prevLayerUnits] = eg[eg.length-1];
 			finalEgPrevStage[numUnits] = eg[eg.length-1];
-			nextStageOutputError = finalEgPrevStage;
-			nextStageCellStateError = lastForgetGateActivations.get(activationCounter);
+			nextStageError = finalEgPrevStage;
 			activationCounter--;
 			return finalEgPrevLayer;
 		}
@@ -203,11 +197,8 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			//storing outputGateActivations
 			lastOutputGateActivations.put(activationCounter, outputGateActivations);
 
-			//storing inputGateActivations
+			//storing intGateActivations
 			lastInputGateActivations.put(activationCounter, inputGateActivations);
-
-			//storing forgetGateActivations
-			lastForgetGateActivations.put(activationCounter, forgetGateActivations);
 
 			//storing cellInputActivations
 			lastCellStateInputActivations.put(activationCounter, cellStateInputActivations);
@@ -220,8 +211,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	public void initializeLayer(int previousLayerUnits) {
 		super.initializeLayer(previousLayerUnits, true);	
 
-		nextStageOutputError = new double[numUnits + 1];
-		nextStageCellStateError = new double[numUnits+1];
+		nextStageError = new double[numUnits + 1];
 
 		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
 
@@ -255,8 +245,6 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		lastInputGateActivations = new HashMap<Integer, double[]>();
 		//lastInputGateActivations.put(-1, new double[numUnits]);
 
-		lastForgetGateActivations = new HashMap<Integer, double[]>();
-
 		cellStateLastActivations = new HashMap<Integer, double[]>();
 		cellStateLastActivations.put(-1, new double[numUnits]);
 
@@ -279,7 +267,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			outputGateStepCache = new double[outputGateWeights.length];
 		}
 		if(training)
-			nextStageOutputError = new double[numUnits + 1];
+			nextStageError = new double[numUnits + 1];
 	}
 
 	public void update(double learningRate) {
