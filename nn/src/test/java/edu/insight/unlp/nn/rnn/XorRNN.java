@@ -11,7 +11,6 @@ import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.lstm.FullyConnectedLSTMLayer;
-import edu.insight.unlp.nn.lstm.LSTM;
 import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
 import edu.insight.unlp.nn.utils.TemporalXOR;
 
@@ -46,7 +45,7 @@ public class XorRNN {
 	}
 
 	public static void main(String[] args) {
-		RNN nn = new LSTM(new SquareErrorFunction());
+		RNN nn = new RNNImpl(new SquareErrorFunction());
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(1, new Sigmoid(), nn);
 		//FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
 		FullyConnectedLSTMLayer hiddenLayer = new FullyConnectedLSTMLayer(10, nn);
@@ -58,8 +57,8 @@ public class XorRNN {
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
-		List<Sequence> trainSeqs = TemporalXOR.generate(10);
-		List<Sequence> testSeqs = TemporalXOR.generate(1000);
+		List<Sequence> trainSeqs = TemporalXOR.generate(1000);
+		List<Sequence> testSeqs = TemporalXOR.generate(100);
 		System.err.print("Done");
 		int epoch = 0;
 		double correctlyClassified;
