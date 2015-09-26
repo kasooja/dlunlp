@@ -45,8 +45,8 @@ public class TemporalXORHeaton {
 	public static final double[] SEQUENCE = { 1.0, 0.0, 1.0, 0.0, 0.0, 0.0,
 		0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };
 	private static Random rng = new Random();
-	private static int sequenceMinLength = 7;
-	private static int sequenceMaxLength = 11;
+	private static int sequenceMinLength = 4;
+	private static int sequenceMaxLength = 7;
 
 
 	public static List<Sequence> generate(int count) {
