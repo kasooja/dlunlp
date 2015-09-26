@@ -2,6 +2,7 @@ package edu.insight.unlp.nn.lstm;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
@@ -21,7 +22,16 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	private double[] forgetGateWeights, forgetGateDeltas, forgetGateStepCache;
 	private double[] outputGateWeights, outputGateDeltas, outputGateStepCache;
 
+	private Map<Integer, double[]> lastOutputGateDerivatives;
+	private Map<Integer, double[]> lastForgetGateDerivatives;
+	private Map<Integer, double[]> lastInputGateDerivatives;
+
+	private Map<Integer, double[]> lastOutputGateActivations;
+	private Map<Integer, double[]> lastInputGateActivations;
 	private Map<Integer, double[]> cellStateLastActivations;
+	private Map<Integer, double[]> lastCellStateInputActivations;
+
+	private double[] nextStageError;
 
 	public FullyConnectedLSTMLayer(int numUnits, ActivationFunction af, NN nn) {
 		this.numUnits = numUnits;
@@ -34,7 +44,132 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	}
 
 	@Override
-	public double[] errorGradient(double[] input) {
+	public double[] errorGradient(double[] eg) {
+		for(int i=0; i<eg.length-1; i++){
+			eg[i] = eg[i] + nextStageError[i];
+		}
+		int currentIndex = nn.getLayers().indexOf(this);
+		if(currentIndex!=0){
+			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
+
+			double[] lastStageOutput = lastActivations.get(activationCounter);
+
+			double[] derivatives = lastActivationDerivatives.get(activationCounter);
+
+			double[] cellStateActivations = cellStateLastActivations.get(activationCounter);
+			double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
+			double[] cellStateDerivatives = afCellOutput.activationDerivative(cellStateActivations);
+
+			double[] outputGateActivation = lastOutputGateActivations.get(activationCounter);
+			double[] forgetGateDerivatives = lastForgetGateDerivatives.get(activationCounter);
+			double[] inputGateDerivatives = lastInputGateDerivatives.get(activationCounter);
+
+			Map<Integer, double[]> prevLayerActivationsMap = prevLayer.lastActivations();
+			double[] prevLayerActivations = prevLayerActivationsMap.get(activationCounter);
+			double[] outputGateDerivatives = lastOutputGateDerivatives.get(activationCounter);
+
+			double[] egOutputGatePrevLayer = new double[prevLayerUnits + 1];
+			double[] egOutputGatePrevStage = new double[numUnits + 1];
+
+			double[] egForgetGatePrevLayer = new double[prevLayerUnits + 1];
+			double[] egForgetGatePrevStage = new double[numUnits + 1];
+
+			double[] egInputGatePrevLayer = new double[prevLayerUnits + 1];
+			double[] egInputGatePrevStage = new double[numUnits + 1];
+
+			double[] egCellStateInputPrevLayer = new double[prevLayerUnits + 1];
+			double[] egCellStateInputPrevStage = new double[numUnits + 1];
+
+			for(int i=0; i<eg.length-1; i++){
+				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
+				double lambda = eg[i] * outputGateDerivatives[i] * cellStateSquashing[i];
+				outputGateDeltas[currentWeightIndex] = outputGateDeltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
+				int j = 0;
+				for(j=0; j<prevLayerUnits; j++){					
+					double delta = lambda * prevLayerActivations[j];
+					outputGateDeltas[currentWeightIndex + j + 1] = outputGateDeltas[currentWeightIndex + j + 1] +  delta;
+					egOutputGatePrevLayer[j] = egOutputGatePrevLayer[j] + delta * outputGateWeights[currentWeightIndex + j + 1];
+				}
+				for(int m=j; m<numUnits+j; m++){					
+					double delta = lambda * lastStageOutput[m-j];
+					outputGateDeltas[currentWeightIndex + m + 1] = outputGateDeltas[currentWeightIndex + m + 1] + delta;
+					egOutputGatePrevStage[m-j] = egOutputGatePrevStage[m-j] + delta * outputGateWeights[currentWeightIndex + m + 1];
+				}
+			}
+
+			for(int i=0; i<eg.length-1; i++){
+				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
+				double lambda = eg[i] * forgetGateDerivatives[i] * cellStateDerivatives[i] * outputGateActivation[i] * cellStateActivations[i];
+				forgetGateDeltas[currentWeightIndex] = forgetGateDeltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
+				int j = 0;
+				for(j=0; j<prevLayerUnits; j++){					
+					double delta = lambda * prevLayerActivations[j];
+					forgetGateDeltas[currentWeightIndex + j + 1] = forgetGateDeltas[currentWeightIndex + j + 1] +  delta;
+					egForgetGatePrevLayer[j] = egForgetGatePrevLayer[j] + delta * forgetGateWeights[currentWeightIndex + j + 1];
+				}
+				for(int m=j; m<numUnits+j; m++){					
+					double delta = lambda * lastStageOutput[m-j];
+					forgetGateDeltas[currentWeightIndex + m + 1] = forgetGateDeltas[currentWeightIndex + m + 1] + delta;
+					egForgetGatePrevStage[m-j] = egForgetGatePrevStage[m-j] + delta * forgetGateWeights[currentWeightIndex + m + 1];
+				}
+			}
+
+			for(int i=0; i<eg.length-1; i++){
+				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
+				double lambda = eg[i] * derivatives[i] * cellStateDerivatives[i] * outputGateActivation[i] * lastInputGateActivations.get(activationCounter)[i] ;
+				deltas[currentWeightIndex] = deltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
+				int j = 0;
+				for(j=0; j<prevLayerUnits; j++){					
+					double delta = lambda * prevLayerActivations[j];
+					deltas[currentWeightIndex + j + 1] = deltas[currentWeightIndex + j + 1] +  delta;
+					egCellStateInputPrevLayer[j] = egCellStateInputPrevLayer[j] + delta * weights[currentWeightIndex + j + 1];
+				}
+				for(int m=j; m<numUnits+j; m++){					
+					double delta = lambda * lastStageOutput[m-j];
+					deltas[currentWeightIndex + m + 1] = deltas[currentWeightIndex + m + 1] + delta;
+					egCellStateInputPrevStage[m-j] = egCellStateInputPrevStage[m-j] + delta * weights[currentWeightIndex + m + 1];
+				}
+			}
+
+			for(int i=0; i<eg.length-1; i++){
+				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
+				double lambda = eg[i] * inputGateDerivatives[i] * cellStateDerivatives[i] * outputGateActivation[i] * lastCellStateInputActivations.get(activationCounter)[i] ;
+				inputGateDeltas[currentWeightIndex] = inputGateDeltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
+				int j = 0;
+				for(j=0; j<prevLayerUnits; j++){					
+					double delta = lambda * prevLayerActivations[j];
+					inputGateDeltas[currentWeightIndex + j + 1] = inputGateDeltas[currentWeightIndex + j + 1] +  delta;
+					egInputGatePrevLayer[j] = egInputGatePrevLayer[j] + delta * inputGateWeights[currentWeightIndex + j + 1];
+				}
+				for(int m=j; m<numUnits+j; m++){					
+					double delta = lambda * lastStageOutput[m-j];
+					inputGateDeltas[currentWeightIndex + m + 1] = inputGateDeltas[currentWeightIndex + m + 1] + delta;
+					egInputGatePrevStage[m-j] = egInputGatePrevStage[m-j] + delta * inputGateWeights[currentWeightIndex + m + 1];
+				}
+			}
+
+			double[] finalEgPrevLayer = new double[prevLayerUnits + 1];
+			double[] finalEgPrevStage = new double[numUnits + 1];
+
+			for(int i=0; i<finalEgPrevLayer.length; i++){
+				finalEgPrevLayer[i] = egCellStateInputPrevLayer[i] + egForgetGatePrevLayer[i] + 
+						egInputGatePrevLayer[i] + egOutputGatePrevLayer[i];
+			}
+
+			for(int i=0; i<finalEgPrevStage.length; i++){
+				finalEgPrevStage[i] = egCellStateInputPrevStage[i] + egForgetGatePrevStage[i] + 
+						egInputGatePrevStage[i] + egOutputGatePrevStage[i];
+			}
+
+			finalEgPrevLayer[prevLayerUnits] = eg[eg.length-1];
+			finalEgPrevStage[numUnits] = eg[eg.length-1];
+
+			//lastActivations.put(activationCounter, null);
+			//lastActivationDerivatives.put(activationCounter, null);
+			nextStageError = finalEgPrevStage;
+			activationCounter--;
+			return finalEgPrevLayer;
+		}
 		return null;
 	}
 
@@ -51,14 +186,6 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			}
 		}
 		return signals;
-	}
-	
-	private double[] elementMul(double[] one, double[] two){
-		double[] result = new double[numUnits];
-		for(int i=0; i<numUnits; i++){
-			result[i] = one[i] * two[i]; 
-		}
-		return result;
 	}
 
 	@Override
@@ -98,8 +225,33 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		cellStateLastActivations.put(activationCounter, cellStateActivations);
 
 		if(training && prevLayerUnits != -1){
-			//IntStream.range(0, signals.length).forEach(i -> derivatives[i] = af.activationDerivative(signals[i]));
-			//lastActivationDerivatives.put(activationCounter, derivatives);
+			//for storing derivatives, if required
+			double[] outputGateDerivatives = new double[outputGateActivations.length];
+			IntStream.range(0, outputGateSignals.length).forEach(i -> outputGateDerivatives[i] = afOutputGate.activationDerivative(outputGateSignals[i]));
+			lastOutputGateDerivatives.put(activationCounter, outputGateDerivatives);
+
+			double[] forgetGateDerivatives = new double[forgetGateActivations.length];
+			IntStream.range(0, forgetGateSignals.length).forEach(i -> forgetGateDerivatives[i] = afForgetGate.activationDerivative(forgetGateSignals[i]));
+			lastForgetGateDerivatives.put(activationCounter, forgetGateDerivatives);
+
+			double[] cellStateInputDerivatives = new double[cellStateInputActivations.length];
+			IntStream.range(0, cellStateInputSignals.length).forEach(i -> cellStateInputDerivatives[i] = af.activationDerivative(cellStateInputSignals[i]));
+			lastActivationDerivatives.put(activationCounter, cellStateInputDerivatives);
+
+			double[] inputGateDerivatives = new double[inputGateActivations.length];
+			IntStream.range(0, inputGateSignals.length).forEach(i -> inputGateDerivatives[i] = afInputGate.activationDerivative(inputGateSignals[i]));
+			lastInputGateDerivatives.put(activationCounter, inputGateDerivatives);
+
+
+			//storing outputGateActivations
+			lastOutputGateActivations.put(activationCounter, outputGateActivations);
+
+			//storing intGateActivations
+			lastInputGateActivations.put(activationCounter, inputGateActivations);
+
+			//storing cellInputActivations
+			lastCellStateInputActivations.put(activationCounter, cellStateInputActivations);
+
 		}
 		return output;
 	}
@@ -107,6 +259,8 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	@Override
 	public void initializeLayer(int previousLayerUnits) {
 		super.initializeLayer(previousLayerUnits, true);	
+
+		nextStageError = new double[numUnits + 1];
 
 		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
 
@@ -125,6 +279,28 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		WeightInitializer.randomInitializeLeCun(forgetGateWeights);//(weights, 0.2);
 		forgetGateDeltas = new double[forgetGateWeights.length];
 
+		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
+		lastOutputGateDerivatives.put(-1, new double[numUnits]);
+
+		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
+		lastForgetGateDerivatives.put(-1, new double[numUnits]);
+
+		lastInputGateDerivatives = new HashMap<Integer, double[]>();
+		lastInputGateDerivatives.put(-1, new double[numUnits]);
+
+		lastOutputGateActivations = new HashMap<Integer, double[]>();
+		lastOutputGateActivations.put(-1, new double[numUnits]);
+
+		lastInputGateActivations = new HashMap<Integer, double[]>();
+		lastInputGateActivations.put(-1, new double[numUnits]);
+
+		cellStateLastActivations = new HashMap<Integer, double[]>();
+		cellStateLastActivations.put(-1, new double[numUnits]);
+
+		lastCellStateInputActivations = new HashMap<Integer, double[]>();
+		lastCellStateInputActivations.put(-1, new double[numUnits]);
+
+
 	}
 
 	public void resetActivationCounter(boolean training){
@@ -139,6 +315,8 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			outputGateDeltas = new double[outputGateWeights.length];
 			outputGateStepCache = new double[outputGateWeights.length];
 		}
+		if(training)
+			nextStageError = new double[numUnits + 1];
 	}
 
 	public void update(double learningRate) {
@@ -146,6 +324,14 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		super.update(learningRate, inputGateWeights, inputGateDeltas, inputGateStepCache);
 		super.update(learningRate, weights, deltas, stepCache);
 		super.update(learningRate, outputGateWeights, outputGateDeltas, outputGateStepCache);
+	}
+
+	private double[] elementMul(double[] one, double[] two){
+		double[] result = new double[numUnits];
+		for(int i=0; i<numUnits; i++){
+			result[i] = one[i] * two[i]; 
+		}
+		return result;
 	}
 
 }

@@ -1,4 +1,4 @@
-package edu.insight.unlp.nn.common;
+package edu.insight.unlp.nn.common.nlp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
