@@ -116,7 +116,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			}
 
 			for(int i=prevLayerUnits; i<prevLayerUnits + numUnits; i++){
-				finalEgPrevStage[i-1] = egOutputGate[i] + egForgetGate[i] + 
+				finalEgPrevStage[i-prevLayerUnits] = egOutputGate[i] + egForgetGate[i] + 
 						egCellStateInputGate[i] + egInputGate[i];
 			}
 
