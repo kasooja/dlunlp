@@ -48,7 +48,7 @@ public class XorRNN {
 		RNN nn = new RNNImpl(new SquareErrorFunction());
 		FullyConnectedLayer outputLayer = new FullyConnectedLayer(1, new Sigmoid(), nn);
 		//FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
-		FullyConnectedLSTMLayer hiddenLayer = new FullyConnectedLSTMLayer(10, nn);
+		FullyConnectedLSTMLayer hiddenLayer = new FullyConnectedLSTMLayer(10, new Sigmoid(), nn);
 		FullyConnectedLayer inputLayer = new FullyConnectedLayer(1, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
@@ -59,7 +59,7 @@ public class XorRNN {
 		System.err.print("Reading data...");
 		List<Sequence> trainSeqs = TemporalXOR.generate(1000);
 		List<Sequence> testSeqs = TemporalXOR.generate(100);
-		System.err.print("Done");
+		System.err.println("Done");
 		int epoch = 0;
 		double correctlyClassified;
 		do {

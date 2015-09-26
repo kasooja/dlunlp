@@ -76,7 +76,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
 			//assuming default value of afCellOutput as tanh, so d/dx tanh = 1 - (Math.pow(tanh, 2));
 			double[] cellStateDerivatives = new double[numUnits]; 
-			IntStream.range(0, numUnits).forEach(i -> cellStateDerivatives[i] = 1-(Math.pow(cellStateActivations[i], 2)));		
+			IntStream.range(0, numUnits).forEach(i -> cellStateDerivatives[i] = 1-(Math.pow(cellStateSquashing[i], 2)));		
 		
 			double[] outputGateLambda = new double[numUnits];
 			double[] forgetGateLambda = new double[numUnits];			
@@ -110,8 +110,8 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 						egCellStateInputGate[i] + egInputGate[i];
 			}
 
-			for(int i=prevLayerUnits-1; i<prevLayerUnits + numUnits; i++){
-				finalEgPrevStage[i] = egOutputGate[i] + egForgetGate[i] + 
+			for(int i=prevLayerUnits; i<prevLayerUnits + numUnits; i++){
+				finalEgPrevStage[i-1] = egOutputGate[i] + egForgetGate[i] + 
 						egCellStateInputGate[i] + egInputGate[i];
 			}
 
