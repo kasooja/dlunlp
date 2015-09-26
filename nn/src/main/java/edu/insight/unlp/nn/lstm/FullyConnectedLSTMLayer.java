@@ -43,7 +43,26 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		this(numUnits, new Tanh(), nn);
 	}
 
-	@Override
+	public double[] errorGradient(double[] eg, double[] lambda, double[] prevLayerActivations, double[] feedback, double[] deltas, double[] weights){
+		double[] egPrev = new double[prevLayerUnits + numUnits];
+		for(int i=0; i<eg.length-1; i++){
+			int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
+			deltas[currentWeightIndex] = deltas[currentWeightIndex] +  1 * lambda[i]; //the bias one, multiplied the weight by 1, so added directly to outputs
+			int j = 0;
+			for(j=0; j<prevLayerUnits; j++){					
+				double delta = lambda[i] * prevLayerActivations[j];
+				deltas[currentWeightIndex + j + 1] = deltas[currentWeightIndex + j + 1] +  delta;
+				egPrev[j] = egPrev[j] + delta * weights[currentWeightIndex + j + 1];
+			}
+			for(int m=j; m<numUnits+j; m++){					
+				double delta = lambda[i] * feedback[m-j];
+				deltas[currentWeightIndex + m + 1] = deltas[currentWeightIndex + m + 1] + delta;
+				egPrev[prevLayerUnits + m-j] = egPrev[prevLayerUnits + m-j] + delta * weights[currentWeightIndex + m + 1];
+			}
+		}
+		return egPrev;
+	}
+
 	public double[] errorGradient(double[] eg) {
 		for(int i=0; i<eg.length-1; i++){
 			eg[i] = eg[i] + nextStageError[i];
@@ -51,121 +70,51 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		int currentIndex = nn.getLayers().indexOf(this);
 		if(currentIndex!=0){
 			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
-
-			double[] lastStageOutput = lastActivations.get(activationCounter);
-
-			double[] derivatives = lastActivationDerivatives.get(activationCounter);
-
+		
+			//recomputing it, didnt store, needed for the backprop
 			double[] cellStateActivations = cellStateLastActivations.get(activationCounter);
 			double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
 			double[] cellStateDerivatives = afCellOutput.activationDerivative(cellStateActivations);
 
-			double[] outputGateActivation = lastOutputGateActivations.get(activationCounter);
-			double[] forgetGateDerivatives = lastForgetGateDerivatives.get(activationCounter);
-			double[] inputGateDerivatives = lastInputGateDerivatives.get(activationCounter);
+			double[] outputGateLambda = new double[numUnits];
+			double[] forgetGateLambda = new double[numUnits];			
+			double[] cellStateInputLambda = new double[numUnits];
+			double[] inputGateLambda = new double[numUnits];
 
-			Map<Integer, double[]> prevLayerActivationsMap = prevLayer.lastActivations();
-			double[] prevLayerActivations = prevLayerActivationsMap.get(activationCounter);
-			double[] outputGateDerivatives = lastOutputGateDerivatives.get(activationCounter);
-
-			double[] egOutputGatePrevLayer = new double[prevLayerUnits + 1];
-			double[] egOutputGatePrevStage = new double[numUnits + 1];
-
-			double[] egForgetGatePrevLayer = new double[prevLayerUnits + 1];
-			double[] egForgetGatePrevStage = new double[numUnits + 1];
-
-			double[] egInputGatePrevLayer = new double[prevLayerUnits + 1];
-			double[] egInputGatePrevStage = new double[numUnits + 1];
-
-			double[] egCellStateInputPrevLayer = new double[prevLayerUnits + 1];
-			double[] egCellStateInputPrevStage = new double[numUnits + 1];
-
-			for(int i=0; i<eg.length-1; i++){
-				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
-				double lambda = eg[i] * outputGateDerivatives[i] * cellStateSquashing[i];
-				outputGateDeltas[currentWeightIndex] = outputGateDeltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
-				int j = 0;
-				for(j=0; j<prevLayerUnits; j++){					
-					double delta = lambda * prevLayerActivations[j];
-					outputGateDeltas[currentWeightIndex + j + 1] = outputGateDeltas[currentWeightIndex + j + 1] +  delta;
-					egOutputGatePrevLayer[j] = egOutputGatePrevLayer[j] + delta * outputGateWeights[currentWeightIndex + j + 1];
-				}
-				for(int m=j; m<numUnits+j; m++){					
-					double delta = lambda * lastStageOutput[m-j];
-					outputGateDeltas[currentWeightIndex + m + 1] = outputGateDeltas[currentWeightIndex + m + 1] + delta;
-					egOutputGatePrevStage[m-j] = egOutputGatePrevStage[m-j] + delta * outputGateWeights[currentWeightIndex + m + 1];
-				}
+			for(int i=0; i<numUnits; i++){
+				outputGateLambda[i] = eg[i] * lastOutputGateDerivatives.get(activationCounter)[i] * cellStateSquashing[i];
+				forgetGateLambda[i] = eg[i] * lastForgetGateDerivatives.get(activationCounter)[i] *
+						cellStateDerivatives[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateActivations[i];
+				cellStateInputLambda[i] = eg[i] * lastActivationDerivatives.get(activationCounter)[i] * 
+						cellStateDerivatives[i] * lastOutputGateActivations.get(activationCounter)[i] * lastInputGateActivations.get(activationCounter)[i] ;
+				inputGateLambda[i] = eg[i] * lastInputGateDerivatives.get(activationCounter)[i] * cellStateDerivatives[i] *
+						lastOutputGateActivations.get(activationCounter)[i] * lastCellStateInputActivations.get(activationCounter)[i] ;
 			}
 
-			for(int i=0; i<eg.length-1; i++){
-				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
-				double lambda = eg[i] * forgetGateDerivatives[i] * cellStateDerivatives[i] * outputGateActivation[i] * cellStateActivations[i];
-				forgetGateDeltas[currentWeightIndex] = forgetGateDeltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
-				int j = 0;
-				for(j=0; j<prevLayerUnits; j++){					
-					double delta = lambda * prevLayerActivations[j];
-					forgetGateDeltas[currentWeightIndex + j + 1] = forgetGateDeltas[currentWeightIndex + j + 1] +  delta;
-					egForgetGatePrevLayer[j] = egForgetGatePrevLayer[j] + delta * forgetGateWeights[currentWeightIndex + j + 1];
-				}
-				for(int m=j; m<numUnits+j; m++){					
-					double delta = lambda * lastStageOutput[m-j];
-					forgetGateDeltas[currentWeightIndex + m + 1] = forgetGateDeltas[currentWeightIndex + m + 1] + delta;
-					egForgetGatePrevStage[m-j] = egForgetGatePrevStage[m-j] + delta * forgetGateWeights[currentWeightIndex + m + 1];
-				}
-			}
-
-			for(int i=0; i<eg.length-1; i++){
-				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
-				double lambda = eg[i] * derivatives[i] * cellStateDerivatives[i] * outputGateActivation[i] * lastInputGateActivations.get(activationCounter)[i] ;
-				deltas[currentWeightIndex] = deltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
-				int j = 0;
-				for(j=0; j<prevLayerUnits; j++){					
-					double delta = lambda * prevLayerActivations[j];
-					deltas[currentWeightIndex + j + 1] = deltas[currentWeightIndex + j + 1] +  delta;
-					egCellStateInputPrevLayer[j] = egCellStateInputPrevLayer[j] + delta * weights[currentWeightIndex + j + 1];
-				}
-				for(int m=j; m<numUnits+j; m++){					
-					double delta = lambda * lastStageOutput[m-j];
-					deltas[currentWeightIndex + m + 1] = deltas[currentWeightIndex + m + 1] + delta;
-					egCellStateInputPrevStage[m-j] = egCellStateInputPrevStage[m-j] + delta * weights[currentWeightIndex + m + 1];
-				}
-			}
-
-			for(int i=0; i<eg.length-1; i++){
-				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
-				double lambda = eg[i] * inputGateDerivatives[i] * cellStateDerivatives[i] * outputGateActivation[i] * lastCellStateInputActivations.get(activationCounter)[i] ;
-				inputGateDeltas[currentWeightIndex] = inputGateDeltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
-				int j = 0;
-				for(j=0; j<prevLayerUnits; j++){					
-					double delta = lambda * prevLayerActivations[j];
-					inputGateDeltas[currentWeightIndex + j + 1] = inputGateDeltas[currentWeightIndex + j + 1] +  delta;
-					egInputGatePrevLayer[j] = egInputGatePrevLayer[j] + delta * inputGateWeights[currentWeightIndex + j + 1];
-				}
-				for(int m=j; m<numUnits+j; m++){					
-					double delta = lambda * lastStageOutput[m-j];
-					inputGateDeltas[currentWeightIndex + m + 1] = inputGateDeltas[currentWeightIndex + m + 1] + delta;
-					egInputGatePrevStage[m-j] = egInputGatePrevStage[m-j] + delta * inputGateWeights[currentWeightIndex + m + 1];
-				}
-			}
+			double[] egOutputGate = errorGradient(eg, outputGateLambda, prevLayer.lastActivations().get(activationCounter), 
+					lastActivations.get(activationCounter), outputGateDeltas, outputGateWeights);
+			double[] egForgetGate = errorGradient(eg, forgetGateLambda, prevLayer.lastActivations().get(activationCounter), 
+					lastActivations.get(activationCounter), forgetGateDeltas, forgetGateWeights);
+			double[] egCellStateInputGate = errorGradient(eg, cellStateInputLambda, prevLayer.lastActivations().get(activationCounter),
+					lastActivations.get(activationCounter), deltas, weights);
+			double[] egInputGate = errorGradient(eg, inputGateLambda, prevLayer.lastActivations().get(activationCounter), 
+					lastActivations.get(activationCounter), inputGateDeltas, inputGateWeights);
 
 			double[] finalEgPrevLayer = new double[prevLayerUnits + 1];
 			double[] finalEgPrevStage = new double[numUnits + 1];
 
-			for(int i=0; i<finalEgPrevLayer.length; i++){
-				finalEgPrevLayer[i] = egCellStateInputPrevLayer[i] + egForgetGatePrevLayer[i] + 
-						egInputGatePrevLayer[i] + egOutputGatePrevLayer[i];
+			for(int i=0; i<prevLayerUnits; i++){
+				finalEgPrevLayer[i] = egOutputGate[i] + egForgetGate[i] + 
+						egCellStateInputGate[i] + egInputGate[i];
 			}
 
-			for(int i=0; i<finalEgPrevStage.length; i++){
-				finalEgPrevStage[i] = egCellStateInputPrevStage[i] + egForgetGatePrevStage[i] + 
-						egInputGatePrevStage[i] + egOutputGatePrevStage[i];
+			for(int i=prevLayerUnits-1; i<prevLayerUnits + numUnits; i++){
+				finalEgPrevStage[i] = egOutputGate[i] + egForgetGate[i] + 
+						egCellStateInputGate[i] + egInputGate[i];
 			}
 
 			finalEgPrevLayer[prevLayerUnits] = eg[eg.length-1];
 			finalEgPrevStage[numUnits] = eg[eg.length-1];
-
-			//lastActivations.put(activationCounter, null);
-			//lastActivationDerivatives.put(activationCounter, null);
 			nextStageError = finalEgPrevStage;
 			activationCounter--;
 			return finalEgPrevLayer;
