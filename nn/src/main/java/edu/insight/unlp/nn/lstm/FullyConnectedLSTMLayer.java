@@ -74,8 +74,10 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			//recomputing it, didnt store, needed for the backprop
 			double[] cellStateActivations = cellStateLastActivations.get(activationCounter);
 			double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
-			double[] cellStateDerivatives = afCellOutput.activationDerivative(cellStateActivations);
-
+			//assuming default value of afCellOutput as tanh, so d/dx tanh = 1 - (Math.pow(tanh, 2));
+			double[] cellStateDerivatives = new double[numUnits]; 
+			IntStream.range(0, numUnits).forEach(i -> cellStateDerivatives[i] = 1-(Math.pow(cellStateActivations[i], 2)));		
+		
 			double[] outputGateLambda = new double[numUnits];
 			double[] forgetGateLambda = new double[numUnits];			
 			double[] cellStateInputLambda = new double[numUnits];
@@ -166,7 +168,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		double[] outputGateActivations = afOutputGate.activation(outputGateSignals);
 
 		//computing lstm block output
-		double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
+		double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);//last tanh on cell state to put the values in -1to1 range
 		double[] output = elementMul(outputGateActivations, cellStateSquashing);
 
 		activationCounter++;
@@ -229,25 +231,25 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		forgetGateDeltas = new double[forgetGateWeights.length];
 
 		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
-		lastOutputGateDerivatives.put(-1, new double[numUnits]);
+		//lastOutputGateDerivatives.put(-1, new double[numUnits]);
 
 		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
-		lastForgetGateDerivatives.put(-1, new double[numUnits]);
+		//lastForgetGateDerivatives.put(-1, new double[numUnits]);
 
 		lastInputGateDerivatives = new HashMap<Integer, double[]>();
-		lastInputGateDerivatives.put(-1, new double[numUnits]);
+		//lastInputGateDerivatives.put(-1, new double[numUnits]);
 
 		lastOutputGateActivations = new HashMap<Integer, double[]>();
-		lastOutputGateActivations.put(-1, new double[numUnits]);
+		//lastOutputGateActivations.put(-1, new double[numUnits]);
 
 		lastInputGateActivations = new HashMap<Integer, double[]>();
-		lastInputGateActivations.put(-1, new double[numUnits]);
+		//lastInputGateActivations.put(-1, new double[numUnits]);
 
 		cellStateLastActivations = new HashMap<Integer, double[]>();
 		cellStateLastActivations.put(-1, new double[numUnits]);
 
 		lastCellStateInputActivations = new HashMap<Integer, double[]>();
-		lastCellStateInputActivations.put(-1, new double[numUnits]);
+		//lastCellStateInputActivations.put(-1, new double[numUnits]);
 
 
 	}
