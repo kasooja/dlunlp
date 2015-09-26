@@ -88,7 +88,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			double[] inputGateLambda = new double[numUnits];
 
 			for(int i=0; i<numUnits; i++){
-				nextStageCellStateError[i] = 0.0; //cell state error transfer not working properly
+				//nextStageCellStateError[i] = 0.0; //cell state error transfer not working properly
 				outputGateLambda[i] = eg[i] * lastOutputGateDerivatives.get(activationCounter)[i] * cellStateSquashing[i];
 				forgetGateLambda[i] = (eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i] + nextStageCellStateError[i]) * 
 						cellStateLastActivations.get(activationCounter-1)[i] * lastForgetGateDerivatives.get(activationCounter)[i] ;
@@ -123,7 +123,11 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			finalEgPrevLayer[prevLayerUnits] = eg[eg.length-1];
 			finalEgPrevStage[numUnits] = eg[eg.length-1];
 			nextStageOutputError = finalEgPrevStage;
-			nextStageCellStateError = lastForgetGateActivations.get(activationCounter);
+
+			for(int i=0; i<numUnits; i++){
+				nextStageCellStateError[i] = lastForgetGateActivations.get(activationCounter)[i] * eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i]; 
+			}
+			nextStageCellStateError[numUnits] = eg[eg.length - 1];
 			activationCounter--;
 			return finalEgPrevLayer;
 		}
