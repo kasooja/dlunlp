@@ -40,9 +40,6 @@ public class WeightInitializer {
 			weightMatrix.weights[i] = biasInitialVal;
 			counter++;
 		}
-		if(biasInitialVal!=null) {
-			initializeSeperateBias(weightMatrix, biasInitialVal);
-		}
 	}
 
 	public static void randomInitializeLeCun(WeightMatrix weightMatrix, Double biasInitialVal){
