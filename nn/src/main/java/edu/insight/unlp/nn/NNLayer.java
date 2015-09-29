@@ -16,9 +16,9 @@ public abstract class NNLayer {
 	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
 	protected int numUnits; 
 	protected int prevLayerUnits;
-	
+
 	protected WeightMatrix weightMatrix;
-	
+
 	public static double decayRate = 0.999;
 	public static double smoothEpsilon = 1e-8;
 	public static double gradientClipValue = 5;
@@ -39,6 +39,9 @@ public abstract class NNLayer {
 
 	public void resetActivationCounter(boolean training){
 		activationCounter = -1;
+		lastActivations = new HashMap<Integer, double[]>();
+		lastActivations.put(-1, new double[numUnits]);
+		lastActivationDerivatives = new HashMap<Integer, double[]>();
 	}
 
 	public void update(double learningRate, WeightMatrix weightMatrix){
@@ -85,20 +88,26 @@ public abstract class NNLayer {
 		if(prevLayerUnits==-1){
 			return;
 		}
-		int totalWeightParams = (previousLayerUnits+1) * numUnits;;
-		if(feedback)
-			totalWeightParams = (previousLayerUnits+1+numUnits) * numUnits;
-		initializeLayer(weightMatrix, totalWeightParams);
+		initializeLayerWeights(weightMatrix, feedback);
 		lastActivationDerivatives = new HashMap<Integer, double[]>();
 	}
 
-	protected void initializeLayer(WeightMatrix weightMatrix, int noParams){
-		weightMatrix.weights = new double[noParams];
-		//WeightInitializer.randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
-		//WeightInitializer.constantInitialize(weightMatrix.weights, 0.2);//randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
-		WeightInitializer.randomInitialize(weightMatrix.weights);
-		weightMatrix.deltas = new double[noParams];
-		weightMatrix.stepCache = new double[noParams];
+	protected void initializeLayerWeights(WeightMatrix weightMatrix, boolean feedback){
+		int totalWeightParams = (prevLayerUnits+1) * numUnits;;
+		weightMatrix.biasMultiplier = (prevLayerUnits+1);
+		if(feedback){
+			totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
+			weightMatrix.biasMultiplier = (prevLayerUnits+1+numUnits);
+		}
+		weightMatrix.weights = new double[totalWeightParams];
+	
+		
+		//WeightInitializer.randomInitialize2(weightMatrix.weights, initParamsStdDev);
+		WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
+		//WeightInitializer.randomInitialize(weightMatrix.weights);
+		weightMatrix.deltas = new double[totalWeightParams];
+		weightMatrix.stepCache = new double[totalWeightParams];
+		
 	}
 
 

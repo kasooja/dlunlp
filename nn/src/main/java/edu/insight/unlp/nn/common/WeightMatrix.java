@@ -6,5 +6,7 @@ public class WeightMatrix {
 	public double[] weights; //keeps the weights of the connections from the previous layer, in lstm, cellStateInput weights
 	public double[] deltas;
 	public double[] stepCache; // stepCache, need to explore more, it is for per parameter RMS weight update
+	
+	public int biasMultiplier;
 
 }
