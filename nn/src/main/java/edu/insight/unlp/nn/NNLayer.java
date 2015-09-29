@@ -88,7 +88,6 @@ public abstract class NNLayer {
 		if(feedback)
 			totalWeightParams = (previousLayerUnits+1+numUnits) * numUnits;
 		weights = new double[totalWeightParams];
-		
 		//WeightInitializer.randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
 		WeightInitializer.constantInitialize(weights, 0.2);//randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
 		deltas = new double[weights.length];

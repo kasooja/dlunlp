@@ -15,7 +15,6 @@ public class RNNImpl implements RNN {
 
 	public List<NNLayer> layers;
 	public ErrorFunction ef;
-	public double[][] networkOutput;
 
 	public RNNImpl(ErrorFunction ef){
 		this.ef = ef;
@@ -40,7 +39,7 @@ public class RNNImpl implements RNN {
 		for(Sequence seq : training){
 			double[][] inputSeq = seq.inputSeq;
 			double[][] target = seq.target;
-			ff(inputSeq);
+			double[][] networkOutput = ff(inputSeq);
 			double[][] eg = new double[networkOutput.length][];
 			for(int i=0; i<networkOutput.length; i++){
 				eg[i] = ef.error(target[i], networkOutput[i]);
@@ -54,9 +53,8 @@ public class RNNImpl implements RNN {
 		return overallError / training.size();
 	}
 
-	private double[] ff(double[][] inputSeq){
-		double[] finalActivations = null;
-		networkOutput = new double[inputSeq.length][];
+	private double[][] ff(double[][] inputSeq){
+		double[][] networkOutput = new double[inputSeq.length][];
 		int i = 0;
 		for(double[] input : inputSeq){
 			double[] activations = null;
@@ -65,9 +63,8 @@ public class RNNImpl implements RNN {
 				activations = layer.computeActivations(activations, true);
 			}
 			networkOutput[i++] = activations;
-			finalActivations = activations;
 		}
-		return finalActivations;
+		return networkOutput;
 	}
 
 	private double[] bp(double[][] errorGradient){

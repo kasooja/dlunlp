@@ -15,7 +15,6 @@ public class MLPImpl implements MLP {
 
 	public List<NNLayer> layers;
 	public ErrorFunction ef;
-	public double[] networkOutput;
 
 	public MLPImpl(ErrorFunction ef){
 		this.ef = ef;
@@ -62,11 +61,10 @@ public class MLPImpl implements MLP {
 	}
 
 	private double[] ff(double[] input, boolean training){
-		double[] activations = input;		
+		double[] networkOutput = input;		
 		for(NNLayer layer : layers){
-			activations = layer.computeActivations(activations, training);
+			networkOutput = layer.computeActivations(networkOutput, training);
 		}
-		networkOutput = activations;
 		return networkOutput;
 	}
 
