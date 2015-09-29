@@ -12,6 +12,7 @@ public class FullyConnectedFFLayer extends NNLayer {
 		this.numUnits = numUnits;
 		this.af = af;
 		this.nn = nn;
+		weightMatrix = new WeightMatrix();
 	}
 
 	@Override

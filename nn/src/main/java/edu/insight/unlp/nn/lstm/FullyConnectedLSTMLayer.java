@@ -37,10 +37,10 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		afOutputGate = new Sigmoid();
 		afCellOutput = new Tanh();
 		
+		weightMatrix = new WeightMatrix();
 		inputGateMatrix = new WeightMatrix();
 		forgetGateMatrix = new WeightMatrix();
 		outputGateMatrix = new WeightMatrix();
-		
 		
 	}
 

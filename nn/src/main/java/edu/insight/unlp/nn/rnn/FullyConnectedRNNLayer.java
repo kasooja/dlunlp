@@ -15,6 +15,7 @@ public class FullyConnectedRNNLayer extends NNLayer {
 		this.numUnits = numUnits;
 		this.af = af;
 		this.nn = nn;
+		weightMatrix = new WeightMatrix();
 	}
 
 	public void resetActivationCounter(boolean training){
