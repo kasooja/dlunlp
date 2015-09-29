@@ -5,6 +5,7 @@ import java.util.Map;
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
+import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class FullyConnectedRNNLayer extends NNLayer {
 
@@ -43,17 +44,17 @@ public class FullyConnectedRNNLayer extends NNLayer {
 			for(int i=0; i<eg.length-1; i++){
 				int currentWeightIndex = i * (1 + prevLayerActivations.length + lastActivations.get(0).length);			
 				double lambda = eg[i] * derivatives[i];
-				deltas[currentWeightIndex] = deltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
+				weightMatrix.deltas[currentWeightIndex] = weightMatrix.deltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
 				int j = 0;
 				for(j=0; j<prevLayerActivations.length; j++){					
 					double delta = lambda * prevLayerActivations[j];
-					deltas[currentWeightIndex + j + 1] = deltas[currentWeightIndex + j + 1] +  delta;
-					egPrevLayer[j] = egPrevLayer[j] + delta * weights[currentWeightIndex + j + 1];
+					weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] +  delta;
+					egPrevLayer[j] = egPrevLayer[j] + delta * weightMatrix.weights[currentWeightIndex + j + 1];
 				}
 				for(int m=j; m<activations.length+j; m++){					
 					double delta = lambda * activations[m-j];
-					deltas[currentWeightIndex + m + 1] = deltas[currentWeightIndex + m + 1] + delta;
-					egPrevStage[m-j] = egPrevStage[m-j] + delta * weights[currentWeightIndex + m + 1];
+					weightMatrix.deltas[currentWeightIndex + m + 1] = weightMatrix.deltas[currentWeightIndex + m + 1] + delta;
+					egPrevStage[m-j] = egPrevStage[m-j] + delta * weightMatrix.weights[currentWeightIndex + m + 1];
 				}
 			}
 			lastActivations.put(activationCounter, null);
@@ -67,20 +68,20 @@ public class FullyConnectedRNNLayer extends NNLayer {
 		return null;
 	}
 
-	public double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations) {
+	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {
 		double signals[] = new double[numUnits];
 		for (int i = 0; i < signals.length; i++) {
-			signals[i] = 1 * weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs
+			signals[i] = 1 * weightMatrix.weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs
 			int j = 0;
 			for (j = 0; j < input.length; j++) {
-				signals[i] += input[j] * weights[i * (input.length + 1 + numUnits) + j + 1];
+				signals[i] += input[j] * weightMatrix.weights[i * (input.length + 1 + numUnits) + j + 1];
 			}
 			for (int m = j; m < numUnits+j; m++) {
-				signals[i] += activations.get(activationCounter)[m-j] * weights[i * (input.length + 1 + numUnits) + m + 1];
+				signals[i] += activations.get(activationCounter)[m-j] * weightMatrix.weights[i * (input.length + 1 + numUnits) + m + 1];
 			}
 		}
 		return signals;
 	}
 
-	
+
 }

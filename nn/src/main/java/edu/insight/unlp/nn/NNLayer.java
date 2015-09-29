@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.IntStream;
 
 import edu.insight.unlp.nn.common.WeightInitializer;
+import edu.insight.unlp.nn.common.WeightMatrix;
 
 public abstract class NNLayer {
 
@@ -15,9 +16,9 @@ public abstract class NNLayer {
 	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
 	protected int numUnits; 
 	protected int prevLayerUnits;
-	protected double[] weights; //keeps the weights of the connections from the previous layer, in lstm, cellStateInput weights
-	protected double[] deltas;
-	protected double[] stepCache; // stepCache, explore more, it is for per parameter RMS weight update
+	
+	protected WeightMatrix weightMatrix;
+	
 	public static double decayRate = 0.999;
 	public static double smoothEpsilon = 1e-8;
 	public static double gradientClipValue = 5;
@@ -40,10 +41,10 @@ public abstract class NNLayer {
 		activationCounter = -1;
 	}
 
-	public void update(double learningRate, double[] weights, double[] deltas, double[] stepCache){
-		for(int i=0; i<weights.length; i++) {
-			double mdwi = deltas[i]; // rmsprop adaptive learning rate
-			stepCache[i] = stepCache[i] * decayRate + (1 - decayRate) * mdwi * mdwi; 
+	public void update(double learningRate, WeightMatrix weightMatrix){
+		for(int i=0; i<weightMatrix.weights.length; i++) {
+			double mdwi = weightMatrix.deltas[i]; // rmsprop adaptive learning rate
+			weightMatrix.stepCache[i] = weightMatrix.stepCache[i] * decayRate + (1 - decayRate) * mdwi * mdwi; 
 
 			if (mdwi > gradientClipValue) {			// gradient clip
 				mdwi = gradientClipValue;
@@ -52,19 +53,19 @@ public abstract class NNLayer {
 				mdwi = -gradientClipValue;
 			}
 			// update (and regularize)
-			weights[i] += - learningRate * mdwi / Math.sqrt(stepCache[i] + smoothEpsilon) - regularization * weights[i];
-			deltas[i] = 0;
+			weightMatrix.weights[i] += - learningRate * mdwi / Math.sqrt(weightMatrix.stepCache[i] + smoothEpsilon) - regularization * weightMatrix.weights[i];
+			weightMatrix.deltas[i] = 0;
 		}
 		//	IntStream.range(0, weights.length).forEach(i -> weights[i] = weights[i] - learningRate * deltas[i] - momentum * prevDeltas[i]);
 		//	prevDeltas  = deltas;
 	}
 
 	public void update(double learningRate){
-		update(learningRate, weights, deltas, stepCache);
+		update(learningRate, weightMatrix);
 	}
-	
+
 	public double[] computeActivations(double[] input, boolean training) {
-		double[] signals = computeSignals(input, weights, lastActivations);
+		double[] signals = computeSignals(input, weightMatrix, lastActivations);
 		double[] derivatives = new double[numUnits];
 		double[] activations = new double[numUnits];
 		activationCounter++;
@@ -87,20 +88,26 @@ public abstract class NNLayer {
 		int totalWeightParams = (previousLayerUnits+1) * numUnits;;
 		if(feedback)
 			totalWeightParams = (previousLayerUnits+1+numUnits) * numUnits;
-		weights = new double[totalWeightParams];
-		//WeightInitializer.randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
-		WeightInitializer.constantInitialize(weights, 0.2);//randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
-		deltas = new double[weights.length];
-		stepCache = new double[weights.length];
+		initializeLayer(weightMatrix, totalWeightParams);
 		lastActivationDerivatives = new HashMap<Integer, double[]>();
 	}
-	
+
+	protected void initializeLayer(WeightMatrix weightMatrix, int noParams){
+		weightMatrix.weights = new double[noParams];
+		//WeightInitializer.randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
+		//WeightInitializer.constantInitialize(weightMatrix.weights, 0.2);//randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
+		WeightInitializer.randomInitialize(weightMatrix.weights);
+		weightMatrix.deltas = new double[noParams];
+		weightMatrix.stepCache = new double[noParams];
+	}
+
+
 	public int getActivationCounterVal(){
 		return activationCounter;
 	}
 
 	public abstract double[] errorGradient(double[] input);
-	public abstract double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations);
+	public abstract double[] computeSignals(double[] input, WeightMatrix weights, Map<Integer, double[]> activations);
 	public abstract void initializeLayer(int previousLayerUnits);
 
 }

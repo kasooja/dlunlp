@@ -9,58 +9,60 @@ import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.af.Tanh;
-import edu.insight.unlp.nn.common.WeightInitializer;
+import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class FullyConnectedLSTMLayer extends NNLayer {
 
-	private ActivationFunction afInputGate = new Sigmoid();
-	private ActivationFunction afForgetGate = new Sigmoid();
-	private ActivationFunction afOutputGate = new Sigmoid();
-	private ActivationFunction afCellOutput = new Tanh();
+	private ActivationFunction afInputGate, afForgetGate, afOutputGate, afCellOutput;
 
-	private double[] inputGateWeights, inputGateDeltas, inputGateStepCache;
-	private double[] forgetGateWeights, forgetGateDeltas, forgetGateStepCache;
-	private double[] outputGateWeights, outputGateDeltas, outputGateStepCache;
+	private WeightMatrix inputGateMatrix;
+	private WeightMatrix forgetGateMatrix;
+	private WeightMatrix outputGateMatrix;
+	
+	private Map<Integer, double[]> lastOutputGateDerivatives,  lastForgetGateDerivatives, lastInputGateDerivatives;
 
-	private Map<Integer, double[]> lastOutputGateDerivatives;
-	private Map<Integer, double[]> lastForgetGateDerivatives;
-	private Map<Integer, double[]> lastInputGateDerivatives;
+	private Map<Integer, double[]> lastOutputGateActivations, lastInputGateActivations, lastForgetGateActivations;
 
-	private Map<Integer, double[]> lastOutputGateActivations;
-	private Map<Integer, double[]> lastInputGateActivations;
-	private Map<Integer, double[]> lastForgetGateActivations;
+	private Map<Integer, double[]> cellStateLastActivations; //rename 
+	private Map<Integer, double[]> lastCellStateInputActivations; //rename
 
-	private Map<Integer, double[]> cellStateLastActivations;
-	private Map<Integer, double[]> lastCellStateInputActivations;
-
-	private double[] nextStageOutputError;
-	private double[] nextStageCellStateError;
+	private double[] nextStageOutputError, nextStageCellStateError;
 
 	public FullyConnectedLSTMLayer(int numUnits, ActivationFunction af, NN nn) {
 		this.numUnits = numUnits;
 		this.af = af;
 		this.nn = nn;
+		afInputGate = new Sigmoid();
+		afForgetGate = new Sigmoid();
+		afOutputGate = new Sigmoid();
+		afCellOutput = new Tanh();
+		
+		inputGateMatrix = new WeightMatrix();
+		forgetGateMatrix = new WeightMatrix();
+		outputGateMatrix = new WeightMatrix();
+		
+		
 	}
 
 	public FullyConnectedLSTMLayer(int numUnits, NN nn) {
 		this(numUnits, new Tanh(), nn);
 	}
 
-	public double[] errorGradient(double[] eg, double[] lambda, double[] prevLayerActivations, double[] feedback, double[] deltas, double[] weights){
+	public double[] errorGradient(double[] eg, double[] lambda, double[] prevLayerActivations, double[] feedback, WeightMatrix weightMatrix){
 		double[] egPrev = new double[prevLayerUnits + numUnits];
 		for(int i=0; i<eg.length-1; i++){
 			int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
-			deltas[currentWeightIndex] = deltas[currentWeightIndex] +  1 * lambda[i]; //the bias one, multiplied the weight by 1, so added directly to outputs
+			weightMatrix.deltas[currentWeightIndex] = weightMatrix.deltas[currentWeightIndex] +  1 * lambda[i]; //the bias one, multiplied the weight by 1, so added directly to outputs
 			int j = 0;
 			for(j=0; j<prevLayerUnits; j++){					
 				double delta = lambda[i] * prevLayerActivations[j];
-				deltas[currentWeightIndex + j + 1] = deltas[currentWeightIndex + j + 1] +  delta;
-				egPrev[j] = egPrev[j] + delta * weights[currentWeightIndex + j + 1];
+				weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] +  delta;
+				egPrev[j] = egPrev[j] + delta * weightMatrix.weights[currentWeightIndex + j + 1];
 			}
 			for(int m=j; m<numUnits+j; m++){					
 				double delta = lambda[i] * feedback[m-j];
-				deltas[currentWeightIndex + m + 1] = deltas[currentWeightIndex + m + 1] + delta;
-				egPrev[prevLayerUnits + m-j] = egPrev[prevLayerUnits + m-j] + delta * weights[currentWeightIndex + m + 1];
+				weightMatrix.deltas[currentWeightIndex + m + 1] = weightMatrix.deltas[currentWeightIndex + m + 1] + delta;
+				egPrev[prevLayerUnits + m-j] = egPrev[prevLayerUnits + m-j] + delta * weightMatrix.weights[currentWeightIndex + m + 1];
 			}
 		}
 		return egPrev;
@@ -99,13 +101,13 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			}
 
 			double[] egOutputGate = errorGradient(eg, outputGateLambda, prevLayer.lastActivations().get(activationCounter), 
-					lastActivations.get(activationCounter), outputGateDeltas, outputGateWeights);
+					lastActivations.get(activationCounter), outputGateMatrix);
 			double[] egForgetGate = errorGradient(eg, forgetGateLambda, prevLayer.lastActivations().get(activationCounter), 
-					lastActivations.get(activationCounter), forgetGateDeltas, forgetGateWeights);
+					lastActivations.get(activationCounter), forgetGateMatrix);
 			double[] egCellStateInputGate = errorGradient(eg, cellStateInputLambda, prevLayer.lastActivations().get(activationCounter),
-					lastActivations.get(activationCounter), deltas, weights);
+					lastActivations.get(activationCounter), weightMatrix);
 			double[] egInputGate = errorGradient(eg, inputGateLambda, prevLayer.lastActivations().get(activationCounter), 
-					lastActivations.get(activationCounter), inputGateDeltas, inputGateWeights);
+					lastActivations.get(activationCounter), inputGateMatrix);
 
 			double[] finalEgPrevLayer = new double[prevLayerUnits + 1];
 			double[] finalEgPrevStage = new double[numUnits + 1];
@@ -134,16 +136,16 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		return null;
 	}
 
-	public double[] computeSignals(double[] input, double[] weights, Map<Integer, double[]> activations) {
+	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {
 		double signals[] = new double[numUnits];
 		for (int i = 0; i < signals.length; i++) {
-			signals[i] = 1 * weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs
+			signals[i] = 1 * weightMatrix.weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs
 			int j = 0;
 			for (j = 0; j < input.length; j++) {
-				signals[i] += input[j] * weights[i * (input.length + 1 + numUnits) + j + 1];
+				signals[i] += input[j] * weightMatrix.weights[i * (input.length + 1 + numUnits) + j + 1];
 			}
 			for (int m = j; m < numUnits+j; m++) {
-				signals[i] += activations.get(activationCounter)[m-j] * weights[i * (input.length + 1 + numUnits) + m + 1];
+				signals[i] += activations.get(activationCounter)[m-j] * weightMatrix.weights[i * (input.length + 1 + numUnits) + m + 1];
 			}
 		}
 		return signals;
@@ -153,15 +155,15 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	public double[] computeActivations(double[] input, boolean training) {
 		//http://colah.github.io/posts/2015-08-Understanding-LSTMs/
 		//forget gate
-		double forgetGateSignals[] = computeSignals(input, forgetGateWeights, lastActivations);
+		double forgetGateSignals[] = computeSignals(input, forgetGateMatrix, lastActivations);
 		double[] forgetGateActivations = afForgetGate.activation(forgetGateSignals);
 
 		//input gate
-		double inputGateSignals[] = computeSignals(input, inputGateWeights, lastActivations);
+		double inputGateSignals[] = computeSignals(input, inputGateMatrix, lastActivations);
 		double[] inputGateActivations = afInputGate.activation(inputGateSignals);
 
 		// C̃t (see Colah blog), tanh layer, default value of af is tanh, this is the computation of new candidate vector C̃t to be added to the cell state. 
-		double[] cellStateInputSignals = computeSignals(input, weights, lastActivations);  
+		double[] cellStateInputSignals = computeSignals(input, weightMatrix, lastActivations);  
 		double[] cellStateInputActivations = af.activation(cellStateInputSignals);
 
 		//It’s now time to update the old cell state, Ct−1, into the new cell state Ct
@@ -174,7 +176,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		}
 
 		//output gate
-		double outputGateSignals[] = computeSignals(input, outputGateWeights, lastActivations);  //lastActivations stores the step outputs of the lstm block 
+		double outputGateSignals[] = computeSignals(input, outputGateMatrix, lastActivations);  //lastActivations stores the step outputs of the lstm block 
 		double[] outputGateActivations = afOutputGate.activation(outputGateSignals);
 
 		//computing lstm block output
@@ -224,38 +226,27 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	public void initializeLayer(int previousLayerUnits) {
 		super.initializeLayer(previousLayerUnits, true);	
 
-		nextStageOutputError = new double[numUnits + 1];
-		nextStageCellStateError = new double[numUnits+1];
-
-		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
-
-		cellStateLastActivations = new HashMap<Integer, double[]>();
-		cellStateLastActivations.put(-1, new double[numUnits]);
-
-		inputGateWeights = new double[totalWeightParams];
-		WeightInitializer.randomInitializeLeCun(inputGateWeights);//(weights, 0.2);
-		inputGateDeltas = new double[inputGateWeights.length];
-
-		outputGateWeights = new double[totalWeightParams];
-		WeightInitializer.randomInitializeLeCun(outputGateWeights);//(weights, 0.2);
-		outputGateDeltas = new double[outputGateWeights.length];
-
-		forgetGateWeights = new double[totalWeightParams];
-		WeightInitializer.randomInitializeLeCun(forgetGateWeights);//(weights, 0.2);
-		forgetGateDeltas = new double[forgetGateWeights.length];
-
-		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
-		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
-		lastInputGateDerivatives = new HashMap<Integer, double[]>();
-
 		lastOutputGateActivations = new HashMap<Integer, double[]>();
 		lastInputGateActivations = new HashMap<Integer, double[]>();
 		lastForgetGateActivations = new HashMap<Integer, double[]>();
-
+		
 		cellStateLastActivations = new HashMap<Integer, double[]>();
 		cellStateLastActivations.put(-1, new double[numUnits]);
 
 		lastCellStateInputActivations = new HashMap<Integer, double[]>();
+		
+		nextStageOutputError = new double[numUnits + 1];
+		nextStageCellStateError = new double[numUnits+1];
+
+		int totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
+		
+		initializeLayer(inputGateMatrix, totalWeightParams);
+		initializeLayer(outputGateMatrix, totalWeightParams);
+		initializeLayer(forgetGateMatrix, totalWeightParams);
+
+		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
+		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
+		lastInputGateDerivatives = new HashMap<Integer, double[]>();
 	}
 
 	public void resetActivationCounter(boolean training){
@@ -267,10 +258,10 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	}
 
 	public void update(double learningRate) {
-		super.update(learningRate, forgetGateWeights, forgetGateDeltas, forgetGateStepCache);
-		super.update(learningRate, inputGateWeights, inputGateDeltas, inputGateStepCache);
-		super.update(learningRate, weights, deltas, stepCache);
-		super.update(learningRate, outputGateWeights, outputGateDeltas, outputGateStepCache);
+		super.update(learningRate, forgetGateMatrix);
+		super.update(learningRate, inputGateMatrix);
+		super.update(learningRate, weightMatrix);
+		super.update(learningRate, outputGateMatrix);
 	}
 
 	private double[] elementMul(double[] one, double[] two){
