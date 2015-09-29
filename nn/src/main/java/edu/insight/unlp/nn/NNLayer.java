@@ -22,6 +22,7 @@ public abstract class NNLayer {
 	public static double smoothEpsilon = 1e-8;
 	public static double gradientClipValue = 5;
 	public static double regularization = 0.000001; // L2 regularization strength
+	public static double initParamsStdDev = 0.08;
 
 	public int numNeuronUnits(){
 		return numUnits;
@@ -37,10 +38,6 @@ public abstract class NNLayer {
 
 	public void resetActivationCounter(boolean training){
 		activationCounter = -1;
-		if(training && prevLayerUnits!=-1){
-			deltas = new double[weights.length];
-			stepCache = new double[weights.length];
-		}
 	}
 
 	public void update(double learningRate, double[] weights, double[] deltas, double[] stepCache){
@@ -56,6 +53,7 @@ public abstract class NNLayer {
 			}
 			// update (and regularize)
 			weights[i] += - learningRate * mdwi / Math.sqrt(stepCache[i] + smoothEpsilon) - regularization * weights[i];
+			deltas[i] = 0;
 		}
 		//	IntStream.range(0, weights.length).forEach(i -> weights[i] = weights[i] - learningRate * deltas[i] - momentum * prevDeltas[i]);
 		//	prevDeltas  = deltas;
@@ -90,7 +88,9 @@ public abstract class NNLayer {
 		if(feedback)
 			totalWeightParams = (previousLayerUnits+1+numUnits) * numUnits;
 		weights = new double[totalWeightParams];
-		WeightInitializer.randomInitializeLeCun(weights);//(weights, 0.2);
+		
+		//WeightInitializer.randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
+		WeightInitializer.constantInitialize(weights, 0.2);//randomInitialize2(weights, initParamsStdDev);//(weights);//(weights, 0.2);
 		deltas = new double[weights.length];
 		stepCache = new double[weights.length];
 		lastActivationDerivatives = new HashMap<Integer, double[]>();

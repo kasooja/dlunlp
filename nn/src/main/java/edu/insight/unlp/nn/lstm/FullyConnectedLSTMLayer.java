@@ -245,45 +245,25 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		forgetGateDeltas = new double[forgetGateWeights.length];
 
 		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
-		//lastOutputGateDerivatives.put(-1, new double[numUnits]);
-
 		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
-		//lastForgetGateDerivatives.put(-1, new double[numUnits]);
-
 		lastInputGateDerivatives = new HashMap<Integer, double[]>();
-		//lastInputGateDerivatives.put(-1, new double[numUnits]);
 
 		lastOutputGateActivations = new HashMap<Integer, double[]>();
-		//lastOutputGateActivations.put(-1, new double[numUnits]);
-
 		lastInputGateActivations = new HashMap<Integer, double[]>();
-		//lastInputGateActivations.put(-1, new double[numUnits]);
-
 		lastForgetGateActivations = new HashMap<Integer, double[]>();
 
 		cellStateLastActivations = new HashMap<Integer, double[]>();
 		cellStateLastActivations.put(-1, new double[numUnits]);
 
 		lastCellStateInputActivations = new HashMap<Integer, double[]>();
-		//lastCellStateInputActivations.put(-1, new double[numUnits]);
-
-
 	}
 
 	public void resetActivationCounter(boolean training){
 		super.resetActivationCounter(training);
-		if(training && prevLayerUnits!=-1){
-			inputGateDeltas = new double[inputGateWeights.length];
-			inputGateStepCache = new double[inputGateWeights.length];
-
-			forgetGateDeltas = new double[forgetGateWeights.length];
-			forgetGateStepCache = new double[forgetGateWeights.length];
-
-			outputGateDeltas = new double[outputGateWeights.length];
-			outputGateStepCache = new double[outputGateWeights.length];
-		}
-		if(training)
+		if(training){
 			nextStageOutputError = new double[numUnits + 1];
+			nextStageCellStateError = new double[numUnits + 1];
+		}
 	}
 
 	public void update(double learningRate) {
