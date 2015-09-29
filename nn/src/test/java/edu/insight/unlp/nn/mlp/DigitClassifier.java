@@ -71,9 +71,9 @@ public class DigitClassifier {
 		String testtargetsFile = "src/test/resources/data/DigitClassifier/testData/testtargets";
 		MLP nn = new MLPImpl(new SquareErrorFunction());
 		//NN nn = new MLP(new CrossEntropyErrorFunction());
-		FullyConnectedLayer outputLayer = new FullyConnectedLayer(10, new Sigmoid(), nn);		
-		FullyConnectedLayer hiddenLayer = new FullyConnectedLayer(40, new Sigmoid(), nn);		
-		FullyConnectedLayer inputLayer = new FullyConnectedLayer(256, new Linear(), nn);
+		FullyConnectedFFLayer outputLayer = new FullyConnectedFFLayer(10, new Sigmoid(), nn);		
+		FullyConnectedFFLayer hiddenLayer = new FullyConnectedFFLayer(40, new Sigmoid(), nn);		
+		FullyConnectedFFLayer inputLayer = new FullyConnectedFFLayer(256, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);

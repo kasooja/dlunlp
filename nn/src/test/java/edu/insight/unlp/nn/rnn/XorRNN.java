@@ -11,7 +11,7 @@ import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.lstm.FullyConnectedLSTMLayer;
-import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
+import edu.insight.unlp.nn.mlp.FullyConnectedFFLayer;
 import edu.insight.unlp.nn.utils.TemporalXOR;
 
 public class XorRNN {
@@ -46,10 +46,10 @@ public class XorRNN {
 
 	public static void main(String[] args) {
 		RNN nn = new RNNImpl(new SquareErrorFunction());
-		FullyConnectedLayer outputLayer = new FullyConnectedLayer(1, new Sigmoid(), nn);
-		//FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(10, new Sigmoid(), nn);
-		FullyConnectedLSTMLayer hiddenLayer = new FullyConnectedLSTMLayer(10, new Sigmoid(), nn);
-		FullyConnectedLayer inputLayer = new FullyConnectedLayer(1, new Linear(), nn);
+		NNLayer outputLayer = new FullyConnectedFFLayer(1, new Sigmoid(), nn);
+		NNLayer hiddenLayer = new FullyConnectedLSTMLayer(10, new Sigmoid(), nn);
+		//NNLayer hiddenLayer = new FullyConnectedLSTMLayer(10, new Sigmoid(), nn);
+		NNLayer inputLayer = new FullyConnectedFFLayer(1, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
@@ -64,7 +64,7 @@ public class XorRNN {
 		double correctlyClassified;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrain(trainSeqs, 0.00001, true);
+			double trainingError = nn.sgdTrain(trainSeqs, 0.001, true);
 			System.out.println("epoch "+epoch+" training error: " + trainingError);
 			correctlyClassified = test(nn, testSeqs);
 			System.out.println((int)(correctlyClassified*100)+"% correctly classified");

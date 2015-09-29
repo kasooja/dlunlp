@@ -20,7 +20,8 @@ import edu.insight.unlp.nn.af.Linear;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
+import edu.insight.unlp.nn.lstm.FullyConnectedLSTMLayer;
+import edu.insight.unlp.nn.mlp.FullyConnectedFFLayer;
 
 public class SuggestionDataRNN {
 
@@ -156,14 +157,14 @@ public class SuggestionDataRNN {
 	public static void main(String[] args) {
 		RNNImpl nn = new RNNImpl(new SquareErrorFunction());
 		//RNN nn = new RNN(new CrossEntropyErrorFunction());
-		FullyConnectedLayer outputLayer = new FullyConnectedLayer(3, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(15, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
-		FullyConnectedLayer inputLayer = new FullyConnectedLayer(10, new Linear(), nn);
+		NNLayer outputLayer = new FullyConnectedFFLayer(3, new Sigmoid(), nn);
+		//FullyConnectedLSTMLayer hiddenLayer1 = new FullyConnectedLSTMLayer(16, new Sigmoid(), nn);
+		NNLayer hiddenLayer = new FullyConnectedLSTMLayer(25, new Sigmoid(), nn);
+		NNLayer inputLayer = new FullyConnectedFFLayer(10, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
-		layers.add(hiddenLayer1);
+		//layers.add(hiddenLayer1);
 		layers.add(outputLayer);
 		nn.setLayers(layers);
 		nn.initializeNN();
@@ -177,7 +178,7 @@ public class SuggestionDataRNN {
 		double correctlyClassified;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrain(trainingData, 0.001, true);
+			double trainingError = nn.sgdTrain(trainingData, 0.000001, true);
 			//int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError);
 			correctlyClassified = test(nn, testData);

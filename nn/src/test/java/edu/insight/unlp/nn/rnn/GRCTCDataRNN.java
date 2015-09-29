@@ -21,7 +21,7 @@ import edu.insight.unlp.nn.af.Linear;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.mlp.FullyConnectedLayer;
+import edu.insight.unlp.nn.mlp.FullyConnectedFFLayer;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCDataRNN {
@@ -169,10 +169,10 @@ public class GRCTCDataRNN {
 	public static void main(String[] args) {
 		RNNImpl nn = new RNNImpl(new SquareErrorFunction());
 		//RNN nn = new RNN(new CrossEntropyErrorFunction());
-		FullyConnectedRNNLayer outputLayer = new FullyConnectedRNNLayer(9, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer1 = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
-		FullyConnectedRNNLayer hiddenLayer = new FullyConnectedRNNLayer(70, new Sigmoid(), nn);
-		FullyConnectedLayer inputLayer = new FullyConnectedLayer(300, new Linear(), nn);
+		NNLayer outputLayer = new FullyConnectedRNNLayer(9, new Sigmoid(), nn);
+		NNLayer hiddenLayer1 = new FullyConnectedRNNLayer(25, new Sigmoid(), nn);
+		NNLayer hiddenLayer = new FullyConnectedRNNLayer(70, new Sigmoid(), nn);
+		NNLayer inputLayer = new FullyConnectedFFLayer(300, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
 		layers.add(hiddenLayer);
@@ -200,7 +200,7 @@ public class GRCTCDataRNN {
 		double correctlyClassified;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrain(trainingData, 0.001, true);
+			double trainingError = nn.sgdTrain(trainingData, 0.00001, true);
 			//int ce = ((int)(Math.exp(-trainingError)*100));
 			System.out.println("epoch "+epoch+" training error: "+trainingError);
 			correctlyClassified = test(nn, testData);
