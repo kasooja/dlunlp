@@ -7,6 +7,8 @@ import org.apache.commons.math.random.RandomDataImpl;
 
 public class WeightInitializer {
 
+	private static Random rng = new Random();
+	
 	/**
 	 * Sets the weights in the whole matrix uniformly between -eInit and eInit
 	 * (eInit is the standard deviation) with zero mean.
@@ -25,7 +27,6 @@ public class WeightInitializer {
 	}
 
 	public static void randomInitializeKarapathyCode(WeightMatrix weightMatrix, double initParamsStdDev, Double biasInitialVal){
-		Random rng = new Random();
 		for (int i = 0; i < weightMatrix.weights.length; i++) {
 			weightMatrix.weights[i] = rng.nextGaussian() * initParamsStdDev;
 		}
