@@ -24,7 +24,7 @@ public class WeightInitializer {
 		return rnd;
 	}
 
-	public static void randomInitialize2(WeightMatrix weightMatrix, double initParamsStdDev, Double biasInitialVal){
+	public static void randomInitializeKarapathyCode(WeightMatrix weightMatrix, double initParamsStdDev, Double biasInitialVal){
 		Random rng = new Random();
 		for (int i = 0; i < weightMatrix.weights.length; i++) {
 			weightMatrix.weights[i] = rng.nextGaussian() * initParamsStdDev;
@@ -36,9 +36,8 @@ public class WeightInitializer {
 
 	private static void initializeSeperateBias(WeightMatrix weightMatrix, Double biasInitialVal){
 		int counter = 1;
-		for(int i=0; i<weightMatrix.weights.length; i=i+counter*weightMatrix.biasMultiplier){
+		for(int i=0; i<weightMatrix.weights.length; i=counter++*weightMatrix.biasMultiplier){
 			weightMatrix.weights[i] = biasInitialVal;
-			counter++;
 		}
 	}
 

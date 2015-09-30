@@ -100,16 +100,13 @@ public abstract class NNLayer {
 			weightMatrix.biasMultiplier = (prevLayerUnits+1+numUnits);
 		}
 		weightMatrix.weights = new double[totalWeightParams];
-	
-		
-		//WeightInitializer.randomInitialize2(weightMatrix.weights, initParamsStdDev);
-		WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
-		//WeightInitializer.randomInitialize(weightMatrix.weights);
+		WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 1.0);
+		//WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
+		//WeightInitializer.randomInitialize(weightMatrix, 1.0);
 		weightMatrix.deltas = new double[totalWeightParams];
 		weightMatrix.stepCache = new double[totalWeightParams];
 		
 	}
-
 
 	public int getActivationCounterVal(){
 		return activationCounter;
