@@ -32,7 +32,7 @@ public class FullyConnectedFFLayer extends NNLayer {
 					double delta = lambda * prevLayerActivations[j];
 					//deltas[currentWeightIndex + j + 1] = (deltas[currentWeightIndex + j + 1] * activationCounter + delta) / (activationCounter+1);
 					weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] + delta;
-					egPrevLayer[j] = egPrevLayer[j] + delta * weightMatrix.weights[currentWeightIndex + j + 1];
+					egPrevLayer[j] = egPrevLayer[j] + lambda * weightMatrix.weights[currentWeightIndex + j + 1];
 				}
 			}
 			lastActivations.put(activationCounter, null);
@@ -40,8 +40,10 @@ public class FullyConnectedFFLayer extends NNLayer {
 			egPrevLayer[prevLayerActivations.length] = eg[eg.length-1];
 			activationCounter--;
 			return egPrevLayer;
+		} else {
+			activationCounter--;
+			return eg;
 		}
-		return null;
 	}
 
 	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations){ //MLP does not require its activations for feedback, so not used in the method for computing signals

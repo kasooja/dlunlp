@@ -57,12 +57,12 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			for(j=0; j<prevLayerUnits; j++){					
 				double delta = lambda[i] * prevLayerActivations[j];
 				weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] +  delta;
-				egPrev[j] = egPrev[j] + delta * weightMatrix.weights[currentWeightIndex + j + 1];
+				egPrev[j] = egPrev[j] + lambda[i] * weightMatrix.weights[currentWeightIndex + j + 1];
 			}
 			for(int m=j; m<numUnits+j; m++){					
 				double delta = lambda[i] * feedback[m-j];
 				weightMatrix.deltas[currentWeightIndex + m + 1] = weightMatrix.deltas[currentWeightIndex + m + 1] + delta;
-				egPrev[prevLayerUnits + m-j] = egPrev[prevLayerUnits + m-j] + delta * weightMatrix.weights[currentWeightIndex + m + 1];
+				egPrev[prevLayerUnits + m-j] = egPrev[prevLayerUnits + m-j] + lambda[i] * weightMatrix.weights[currentWeightIndex + m + 1];
 			}
 		}
 		return egPrev;
@@ -132,8 +132,10 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			nextStageCellStateError[numUnits] = eg[eg.length - 1];
 			activationCounter--;
 			return finalEgPrevLayer;
+		} else {
+			activationCounter--;
+			return eg;
 		}
-		return null;
 	}
 
 	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {

@@ -36,6 +36,9 @@ public class RNNImpl implements RNN {
 			Collections.shuffle(training);
 		}
 		resetActivationCounter(true);
+		double numerLoss = 0.0;// += loss;
+		double denomLoss = 0.0;//++;			
+
 		for(Sequence seq : training){
 			double[][] inputSeq = seq.inputSeq;
 			double[][] target = seq.target;
@@ -43,6 +46,8 @@ public class RNNImpl implements RNN {
 			double[][] eg = new double[networkOutput.length][];
 			for(int i=0; i<networkOutput.length; i++){
 				eg[i] = ef.error(target[i], networkOutput[i]);
+				numerLoss = numerLoss + eg[i][eg[i].length-1];
+				denomLoss++;
 			}
 			double[] bp = bp(eg);
 			double error = bp[bp.length-1];
@@ -50,7 +55,7 @@ public class RNNImpl implements RNN {
 			update(learningRate);
 			resetActivationCounter(true);
 		}
-		return overallError / training.size();
+		return numerLoss/denomLoss;
 	}
 
 	private double[][] ff(double[][] inputSeq){
@@ -72,7 +77,7 @@ public class RNNImpl implements RNN {
 		double[] stageErrorGradient = null;
 		for(int j=layers.get(layers.size()-1).getActivationCounterVal(); j>=0; j--){
 			stageErrorGradient = errorGradient[j];
-			for(int i = layers.size() - 1; i>0; i--){
+			for(int i = layers.size() - 1; i>=0; i--){
 				stageErrorGradient = layers.get(i).errorGradient(stageErrorGradient);
 			}
 			double totalError = stageErrorGradient[stageErrorGradient.length-1];

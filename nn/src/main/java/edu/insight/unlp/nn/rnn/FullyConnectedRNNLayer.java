@@ -50,12 +50,12 @@ public class FullyConnectedRNNLayer extends NNLayer {
 				for(j=0; j<prevLayerActivations.length; j++){					
 					double delta = lambda * prevLayerActivations[j];
 					weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] +  delta;
-					egPrevLayer[j] = egPrevLayer[j] + delta * weightMatrix.weights[currentWeightIndex + j + 1];
+					egPrevLayer[j] = egPrevLayer[j] + lambda * weightMatrix.weights[currentWeightIndex + j + 1];
 				}
 				for(int m=j; m<activations.length+j; m++){					
 					double delta = lambda * activations[m-j];
 					weightMatrix.deltas[currentWeightIndex + m + 1] = weightMatrix.deltas[currentWeightIndex + m + 1] + delta;
-					egPrevStage[m-j] = egPrevStage[m-j] + delta * weightMatrix.weights[currentWeightIndex + m + 1];
+					egPrevStage[m-j] = egPrevStage[m-j] + lambda * weightMatrix.weights[currentWeightIndex + m + 1];
 				}
 			}
 			lastActivations.put(activationCounter, null);
@@ -65,8 +65,10 @@ public class FullyConnectedRNNLayer extends NNLayer {
 			nextStageError = egPrevStage;
 			activationCounter--;
 			return egPrevLayer;
+		} else {
+			activationCounter--;
+			return eg;
 		}
-		return null;
 	}
 
 	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {
