@@ -33,10 +33,6 @@ public abstract class NNLayer {
 		return lastActivations;
 	}
 
-	public double[] activations() {
-		return lastActivations.get(activationCounter);
-	}
-
 	public void resetActivationCounter(boolean training){
 		activationCounter = -1;
 		lastActivations = new HashMap<Integer, double[]>();
@@ -100,12 +96,13 @@ public abstract class NNLayer {
 			weightMatrix.biasMultiplier = (prevLayerUnits+1+numUnits);
 		}
 		weightMatrix.weights = new double[totalWeightParams];
-		WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 1.0);
-		//WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
-		//WeightInitializer.randomInitialize(weightMatrix, 1.0);
+		//WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 1.0);
+		WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
+		//all other biases to zero in every case, set forget bias to 1.0, as described here: http://jmlr.org/proceedings/papers/v37/jozefowicz15.pdf
+		//WeightInitializer.randomInitializeLeCun(weightMatrix, null);
 		weightMatrix.deltas = new double[totalWeightParams];
 		weightMatrix.stepCache = new double[totalWeightParams];
-		
+
 	}
 
 	public int getActivationCounterVal(){

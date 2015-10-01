@@ -38,30 +38,30 @@ public class FullyConnectedRNNLayer extends NNLayer {
 			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
 			Map<Integer, double[]> prevLayerActivationsMap = prevLayer.lastActivations();
 			double[] prevLayerActivations = prevLayerActivationsMap.get(activationCounter);
-			double[] activations = lastActivations.get(activationCounter-1);
+			double[] feedbackActivations = lastActivations.get(activationCounter-1);
 			double[] derivatives = lastActivationDerivatives.get(activationCounter);
 			double[] egPrevLayer = new double[prevLayerActivations.length + 1];
 			double[] egPrevStage = new double[lastActivations.get(0).length + 1];
 			for(int i=0; i<eg.length-1; i++){
-				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);//LayerActivations.length + lastActivations.get(0).length);			
+				int currentWeightIndex = i * (1 + prevLayerUnits + numUnits);			
 				double lambda = eg[i] * derivatives[i];
 				weightMatrix.deltas[currentWeightIndex] = weightMatrix.deltas[currentWeightIndex] +  1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
 				int j = 0;
-				for(j=0; j<prevLayerActivations.length; j++){					
+				for(j=0; j<prevLayerUnits; j++){					
 					double delta = lambda * prevLayerActivations[j];
 					weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] +  delta;
 					egPrevLayer[j] = egPrevLayer[j] + lambda * weightMatrix.weights[currentWeightIndex + j + 1];
 				}
-				for(int m=j; m<activations.length+j; m++){					
-					double delta = lambda * activations[m-j]; // check it again
+				for(int m=j; m<numUnits+j; m++){					
+					double delta = lambda * feedbackActivations[m-j];
 					weightMatrix.deltas[currentWeightIndex + m + 1] = weightMatrix.deltas[currentWeightIndex + m + 1] + delta;
 					egPrevStage[m-j] = egPrevStage[m-j] + lambda * weightMatrix.weights[currentWeightIndex + m + 1];
 				}
 			}
-			//lastActivations.put(activationCounter, null);
-			//lastActivationDerivatives.put(activationCounter, null);
-			egPrevLayer[prevLayerActivations.length] = eg[eg.length-1];
-			egPrevStage[activations.length] = eg[eg.length-1];
+			lastActivations.put(activationCounter, null);
+			lastActivationDerivatives.put(activationCounter, null);
+			egPrevLayer[prevLayerUnits] = eg[eg.length-1];
+			egPrevStage[numUnits] = eg[eg.length-1];
 			nextStageError = egPrevStage;
 			activationCounter--;
 			return egPrevLayer;

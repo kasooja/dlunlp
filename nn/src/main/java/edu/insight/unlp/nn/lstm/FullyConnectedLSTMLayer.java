@@ -76,7 +76,6 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		int currentIndex = nn.getLayers().indexOf(this);
 		if(currentIndex!=0){
 			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
-
 			//recomputing it, didnt store, needed for the backprop
 			double[] cellStateActivations = cellStateLastActivations.get(activationCounter);
 			double[] cellStateSquashing = afCellOutput.activation(cellStateActivations);
