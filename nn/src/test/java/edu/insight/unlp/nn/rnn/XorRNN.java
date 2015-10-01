@@ -10,7 +10,6 @@ import edu.insight.unlp.nn.af.Linear;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.lstm.FullyConnectedLSTMLayer;
 import edu.insight.unlp.nn.mlp.FullyConnectedFFLayer;
 import edu.insight.unlp.nn.utils.TemporalXOR;
 
@@ -47,8 +46,9 @@ public class XorRNN {
 	public static void main(String[] args) {
 		RNN nn = new RNNImpl(new SquareErrorFunction());
 		NNLayer outputLayer = new FullyConnectedFFLayer(1, new Sigmoid(), nn);
-		NNLayer hiddenLayer = new FullyConnectedLSTMLayer(10, new Sigmoid(), nn);
-		//NNLayer hiddenLayer = new FullyConnectedLSTMLayer(10, new Sigmoid(), nn);
+		NNLayer hiddenLayer = new FullyConnectedRNNLayer(1, new Sigmoid(), nn);
+		//NNLayer hiddenLayer = new FullyConnectedLSTMLayer(1, nn);
+		//NNLayer hiddenLayer = new FullyConnectedFFLayer(1, new Sigmoid(), nn);
 		NNLayer inputLayer = new FullyConnectedFFLayer(1, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);
@@ -57,18 +57,19 @@ public class XorRNN {
 		nn.setLayers(layers);
 		nn.initializeNN();
 		System.err.print("Reading data...");
-		List<Sequence> trainSeqs = TemporalXOR.generate(1000);
-		List<Sequence> testSeqs = TemporalXOR.generate(100);
+		List<Sequence> trainSeqs = TemporalXOR.generate(1, true);
+		List<Sequence> testSeqs = TemporalXOR.generate(1);
 		System.err.println("Done");
 		int epoch = 0;
+		int maxEpochs = 5;
 		double correctlyClassified;
 		do {
 			epoch++;
-			double trainingError = nn.sgdTrain(trainSeqs, 0.001, true);
-			System.out.println("epoch "+epoch+" training error: " + trainingError);
+			double trainingError = nn.sgdTrain(trainSeqs, 0.001, false);
+			System.out.println("epoch["+epoch+"/" + maxEpochs + "] train loss = " + trainingError);
 			correctlyClassified = test(nn, testSeqs);
 			System.out.println((int)(correctlyClassified*100)+"% correctly classified");
-		} while (correctlyClassified < 0.9);
+		} while (correctlyClassified < 0.9 && epoch<maxEpochs);
 	}
 
 }
