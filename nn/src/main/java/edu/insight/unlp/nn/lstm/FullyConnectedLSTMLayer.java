@@ -90,7 +90,6 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			double[] inputGateLambda = new double[numUnits];
 
 			for(int i=0; i<numUnits; i++){
-				//nextStageCellStateError[i] = 0.0; //cell state error transfer not working properly
 				outputGateLambda[i] = eg[i] * lastOutputGateDerivatives.get(activationCounter)[i] * cellStateSquashing[i];
 				forgetGateLambda[i] = (eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i] + nextStageCellStateError[i]) * 
 						cellStateLastActivations.get(activationCounter-1)[i] * lastForgetGateDerivatives.get(activationCounter)[i] ;
@@ -101,13 +100,13 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			}
 
 			double[] egOutputGate = errorGradient(eg, outputGateLambda, prevLayer.lastActivations().get(activationCounter), 
-					lastActivations.get(activationCounter), outputGateMatrix);
+					lastActivations.get(activationCounter-1), outputGateMatrix);
 			double[] egForgetGate = errorGradient(eg, forgetGateLambda, prevLayer.lastActivations().get(activationCounter), 
-					lastActivations.get(activationCounter), forgetGateMatrix);
+					lastActivations.get(activationCounter-1), forgetGateMatrix);
 			double[] egCellStateInputGate = errorGradient(eg, cellStateInputLambda, prevLayer.lastActivations().get(activationCounter),
-					lastActivations.get(activationCounter), weightMatrix);
+					lastActivations.get(activationCounter-1), weightMatrix);
 			double[] egInputGate = errorGradient(eg, inputGateLambda, prevLayer.lastActivations().get(activationCounter), 
-					lastActivations.get(activationCounter), inputGateMatrix);
+					lastActivations.get(activationCounter-1), inputGateMatrix);
 
 			double[] finalEgPrevLayer = new double[prevLayerUnits + 1];
 			double[] finalEgPrevStage = new double[numUnits + 1];
