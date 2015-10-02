@@ -3,6 +3,8 @@ package edu.insight.unlp.nn;
 
 import java.util.List;
 
+import edu.insight.unlp.nn.common.Sequence;
+
 
 public interface NN {
 	
@@ -17,5 +19,9 @@ public interface NN {
 	public List<NNLayer> getLayers();
 	
 	public void resetActivationCounter(boolean training);
+	
+	public double sgdTrain(List<Sequence> training, double learningRate, boolean shuffle);
+	
+	public double[][] output(double[][] inputSeq);
 
 }

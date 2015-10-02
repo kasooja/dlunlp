@@ -16,9 +16,7 @@ public abstract class NNLayer {
 	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
 	protected int numUnits; 
 	protected int prevLayerUnits;
-
 	protected WeightMatrix weightMatrix;
-
 	public static double decayRate = 0.999;
 	public static double smoothEpsilon = 1e-8;
 	public static double gradientClipValue = 5;
@@ -44,7 +42,6 @@ public abstract class NNLayer {
 		for(int i=0; i<weightMatrix.weights.length; i++) {
 			double mdwi = weightMatrix.deltas[i]; // rmsprop adaptive learning rate
 			weightMatrix.stepCache[i] = weightMatrix.stepCache[i] * decayRate + (1 - decayRate) * mdwi * mdwi; 
-
 			if (mdwi > gradientClipValue) {			// gradient clip
 				mdwi = gradientClipValue;
 			}
@@ -96,8 +93,8 @@ public abstract class NNLayer {
 			weightMatrix.biasMultiplier = (prevLayerUnits+1+numUnits);
 		}
 		weightMatrix.weights = new double[totalWeightParams];
-		//WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 1.0);
-		WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
+		WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 0.0);
+		//WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
 		//all other biases to zero in every case, set forget bias to 1.0, as described here: http://jmlr.org/proceedings/papers/v37/jozefowicz15.pdf
 		//WeightInitializer.randomInitializeLeCun(weightMatrix, null);
 		weightMatrix.deltas = new double[totalWeightParams];

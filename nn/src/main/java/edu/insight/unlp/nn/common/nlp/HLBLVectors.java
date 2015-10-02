@@ -13,7 +13,7 @@ public class HLBLVectors {
 
 	static {
 		String filePath = "src/test/resources/hlbl-embeddings-scaled.EMBEDDING_SIZE=50.txt";
-		BufferedReader br = BasicFileTools.getBufferedReaderFile(filePath);
+		BufferedReader br = BasicFileTools.getBufferedReader(filePath);
 		String line = null;
 		try {
 			while((line=br.readLine())!=null){

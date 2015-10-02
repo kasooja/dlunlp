@@ -1,9 +1,5 @@
 package edu.insight.unlp.nn.utils;
 
-
-
-
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -17,8 +13,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-
-
 
 /**
  *  
@@ -104,7 +98,7 @@ public class BasicFileTools {
 		return read;
 	}
 
-	public static BufferedReader getBufferedReaderFile(String filePath) {
+	public static BufferedReader getBufferedReader(String filePath) {
 		return getBufferedReader(getFile(filePath));
 	}
 

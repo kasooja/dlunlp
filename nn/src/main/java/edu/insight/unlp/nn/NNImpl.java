@@ -1,22 +1,19 @@
-package edu.insight.unlp.nn.rnn;
+package edu.insight.unlp.nn;
 
 import java.util.Collections;
 import java.util.List;
 
 import edu.insight.unlp.nn.ErrorFunction;
+import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
-import edu.insight.unlp.nn.RNN;
 import edu.insight.unlp.nn.common.Sequence;
 
-/*
- * RNNs
- */
-public class RNNImpl implements RNN {
+public class NNImpl implements NN {
 
 	public List<NNLayer> layers;
 	public ErrorFunction ef;
 
-	public RNNImpl(ErrorFunction ef){
+	public NNImpl(ErrorFunction ef){
 		this.ef = ef;
 	}
 
@@ -35,9 +32,8 @@ public class RNNImpl implements RNN {
 			Collections.shuffle(training);
 		}
 		resetActivationCounter(true);
-		double numerLoss = 0.0;// += loss;
-		double denomLoss = 0.0;//++;			
-
+		double totalLoss = 0.0;
+		double totalSteps = 0.0;			
 		for(Sequence seq : training){
 			double[][] inputSeq = seq.inputSeq;
 			double[][] target = seq.target;
@@ -45,14 +41,14 @@ public class RNNImpl implements RNN {
 			double[][] eg = new double[networkOutput.length][];
 			for(int i=0; i<networkOutput.length; i++){
 				eg[i] = ef.error(target[i], networkOutput[i]);
-				numerLoss = numerLoss + eg[i][eg[i].length-1];
-				denomLoss++;
+				totalLoss = totalLoss + eg[i][eg[i].length-1];
+				totalSteps++;
 			}
 			bp(eg);
 			update(learningRate);
 			resetActivationCounter(true);
 		}
-		return numerLoss/denomLoss;
+		return totalLoss/totalSteps;
 	}
 
 	private double[][] ff(double[][] inputSeq){
