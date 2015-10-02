@@ -29,6 +29,11 @@ public class DigitClassificationData extends DataSet {
 		this.training = getSequences(traindataFile, traintargetsFile);
 		this.testing = getSequences(testdataFile, testtargetsFile);
 		inputUnits = training.get(0).inputSeq[0].length;
+		setDimensions();
+	}
+	
+	private void setDimensions(){
+		inputUnits = training.get(0).inputSeq[0].length;
 		for(Sequence seq : training) {
 			if(seq.target!=null){		
 				outputUnits = seq.target[0].length;

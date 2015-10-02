@@ -23,10 +23,15 @@ public class TemporalXORData extends DataSet {
 	public TemporalXORData(){
 		setDataSet();
 	}
-	
+
 	public void setDataSet(){
 		this.training = getSequences(trainingSeqs);
 		this.testing = getSequences(testingSeqs);
+		inputUnits = training.get(0).inputSeq[0].length;
+		setDimensions();
+	}
+
+	private void setDimensions(){
 		inputUnits = training.get(0).inputSeq[0].length;
 		for(Sequence seq : training) {
 			if(seq.target!=null){		
@@ -106,6 +111,6 @@ public class TemporalXORData extends DataSet {
 		report.append((int)correctlyClassified + "% correctly classified");
 		return report.toString();
 	}
-	
+
 }
 

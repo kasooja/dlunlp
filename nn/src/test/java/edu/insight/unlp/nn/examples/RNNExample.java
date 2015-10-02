@@ -38,11 +38,11 @@ public class RNNExample {
 		nn.initializeNN();
 		
 		int epoch = 0;
-		int maxEpochs = 25;
+		int maxEpochs = 50;
 		int evaluateEveryNthEpoch = 2;
 		while(epoch<maxEpochs) {
 			epoch++;
-			double trainingError = nn.sgdTrain(dataset.training, 0.001, true);
+			double trainingError = nn.sgdTrain(dataset.training, 0.00001, true);
 			System.out.println("epoch["+epoch+"/" + maxEpochs + "] train loss = " + trainingError);
 			if(epoch%evaluateEveryNthEpoch==0)
 				System.out.println(dataset.evaluateTest(nn));

@@ -9,11 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
-
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
-
 import edu.insight.unlp.nn.DataSet;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
@@ -33,7 +31,7 @@ public class SentimentClassificationWordVecData extends DataSet {
 	private int trainTestRatioConstant = 10;
 	public boolean readSerializedWordVecModel = true;
 	public String savedSentimentDataWord2VecModel = "src/test/resources/data/Sequence/sentiment/sentimentWikiWord.vecMap";
-	
+
 	public SentimentClassificationWordVecData() {
 		setDataSet();
 	}
@@ -51,6 +49,11 @@ public class SentimentClassificationWordVecData extends DataSet {
 		double[] negTarget = new double[]{0};
 		readData(posSentDataDirPath, posTarget);
 		readData(negSentDataDirPath, negTarget);
+		inputUnits = training.get(0).inputSeq[0].length;
+		setDimensions();
+	}
+
+	private void setDimensions(){
 		inputUnits = training.get(0).inputSeq[0].length;
 		for(Sequence seq : training) {
 			if(seq.target!=null){		

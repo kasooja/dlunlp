@@ -42,6 +42,10 @@ public class SentimentClassificationOneHotVecCharData extends DataSet {
 		readData(negSentDataDirPath, negTarget);
 		charToIndex = null;
 		chars =  null;
+		setDimensions();
+	}
+	
+	private void setDimensions(){
 		inputUnits = training.get(0).inputSeq[0].length;
 		for(Sequence seq : training) {
 			if(seq.target!=null){		
@@ -86,28 +90,28 @@ public class SentimentClassificationOneHotVecCharData extends DataSet {
 			br = BasicFileTools.getBufferedReader(dataFilePath);
 			while((line = br.readLine())!=null){
 				line = line.toLowerCase();
-				List<double[]> inputWordVectors = new ArrayList<double[]>();
+				List<double[]> inputCharVectors = new ArrayList<double[]>();
 				for (int i = 0; i < line.length(); i++) {
 					String ch = line.charAt(i) + "";
 					int index = charToIndex.get(ch);
 					double[] charVector = new double[dimensions];
 					charVector[index] = 1.0;
-					inputWordVectors.add(charVector);
+					inputCharVectors.add(charVector);
 				}
 				int classIndex = 0;
 				if(target[0] == 1.0){
 					classIndex = 1;
 				} 		
-				double[][] targetSeq = new double[inputWordVectors.size()][];
+				double[][] targetSeq = new double[inputCharVectors.size()][];
 				for(int k=0; k<targetSeq.length; k++) {
 					targetSeq[k] = target;
 				}
-				targetSeq[targetSeq.length-1] = target;
-				double[][] inputSeq = new double[inputWordVectors.size()][];
-				inputSeq = inputWordVectors.toArray(inputSeq);
+				//targetSeq[targetSeq.length-1] = target;
+				double[][] inputSeq = new double[inputCharVectors.size()][];
+				inputSeq = inputCharVectors.toArray(inputSeq);
 				Sequence seq = new Sequence(inputSeq, targetSeq);
 				int[] randArray = new Random().ints(1, 0, trainTestRatioConstant).toArray();
-				if(randArray[0] == -1){
+				if(randArray[0] == 0){
 					testing.add(seq);
 					actualClassTestTotals[classIndex]++;					
 				} else {
