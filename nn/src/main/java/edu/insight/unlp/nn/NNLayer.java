@@ -33,9 +33,6 @@ public abstract class NNLayer {
 
 	public void resetActivationCounter(boolean training){
 		activationCounter = -1;
-		lastActivations = new HashMap<Integer, double[]>();
-		lastActivations.put(-1, new double[numUnits]);
-		lastActivationDerivatives = new HashMap<Integer, double[]>();
 	}
 
 	public void update(double learningRate, WeightMatrix weightMatrix){
