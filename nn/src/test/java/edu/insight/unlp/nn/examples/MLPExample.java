@@ -11,7 +11,7 @@ import edu.insight.unlp.nn.af.Linear;
 import edu.insight.unlp.nn.af.Sigmoid;
 import edu.insight.unlp.nn.data.DigitClassificationData;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
-import edu.insight.unlp.nn.mlp.FullyConnectedFFLayer;
+import edu.insight.unlp.nn.layers.FullyConnectedFFLayer;
 
 public class MLPExample {
 

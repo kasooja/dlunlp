@@ -152,9 +152,18 @@ public class GRCTCClassificationData extends DataSet {
 		int totalSteps = 0;
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
-			double[][] output = nn.output(seq.inputSeq);
-			double[] networkOutput = output[output.length-1];
 			double[] actualOutput = seq.target[seq.target.length - 1];
+			double[][] output = nn.output(seq.inputSeq);
+			double[] networkOutput = new double[actualOutput.length];
+			for(int m=0; m<output.length; m++){
+				for(int k=0; k<output[0].length; k++){
+					networkOutput[k] = networkOutput[k] + output[m][k]; 
+				}
+			}
+			for(int k=0; k<output[0].length; k++){
+				networkOutput[k] = networkOutput[k]/output.length;
+			}
+
 			for(int i=0; i<networkOutput.length; i++){
 				networkOutput[i] = Math.round(networkOutput[i]);
 			}

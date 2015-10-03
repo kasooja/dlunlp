@@ -10,8 +10,11 @@ import edu.insight.unlp.nn.common.Sequence;
 
 public class NNImpl implements NN {
 
-	public List<NNLayer> layers;
-	public ErrorFunction ef;
+	protected List<NNLayer> layers;
+	protected ErrorFunction ef;
+
+	private double totalLoss = 0.0;
+	private double totalSteps = 0.0;
 
 	public NNImpl(ErrorFunction ef){
 		this.ef = ef;
@@ -31,19 +34,11 @@ public class NNImpl implements NN {
 		if(shuffle){
 			Collections.shuffle(training);
 		}
+		totalLoss = 0.0;
+		totalSteps = 0.0;
 		resetActivationCounter(true);
-		double totalLoss = 0.0;
-		double totalSteps = 0.0;			
 		for(Sequence seq : training){
-			double[][] inputSeq = seq.inputSeq;
-			double[][] target = seq.target;
-			double[][] networkOutput = ff(inputSeq);
-			double[][] eg = new double[networkOutput.length][];
-			for(int i=0; i<networkOutput.length; i++){
-				eg[i] = ef.error(target[i], networkOutput[i]);
-				totalLoss = totalLoss + eg[i][eg[i].length-1];
-				totalSteps++;
-			}
+			double[][] eg = ffError(seq);//new double[networkOutput.length][];
 			bp(eg);
 			update(learningRate);
 			resetActivationCounter(true);
@@ -51,18 +46,21 @@ public class NNImpl implements NN {
 		return totalLoss/totalSteps;
 	}
 
-	private double[][] ff(double[][] inputSeq){
-		double[][] networkOutput = new double[inputSeq.length][];
+	private double[][] ffError(Sequence seq){
+		double[][] eg = new double[seq.inputSeq.length][];
 		int i = 0;
-		for(double[] input : inputSeq){
+		for(double[] input : seq.inputSeq){
 			double[] activations = null;
 			activations = input;		
 			for(NNLayer layer : layers){
 				activations = layer.computeActivations(activations, true);
 			}
-			networkOutput[i++] = activations;
+			eg[i] = ef.error(seq.target[i], activations);
+			totalLoss = totalLoss + eg[i][eg[i].length-1];
+			totalSteps++;
+			i++;
 		}
-		return networkOutput;
+		return eg;
 	}
 
 	private void bp(double[][] errorGradient){
