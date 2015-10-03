@@ -252,9 +252,9 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		nextStageOutputError = new double[numUnits + 1];
 		nextStageCellStateError = new double[numUnits+1];
 
-		initializeLayerWeights(inputGateMatrix, true);
-		initializeLayerWeights(outputGateMatrix, true);
-		initializeLayerWeights(forgetGateMatrix, true);
+		initializeLayerWeights(inputGateMatrix, true, 0.0);
+		initializeLayerWeights(outputGateMatrix, true, 0.0);
+		initializeLayerWeights(forgetGateMatrix, true, 1.0);
 
 		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
 		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
