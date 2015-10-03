@@ -31,7 +31,7 @@ public class GRCTCClassificationData extends DataSet {
 	private double[] predictedTotalClassTotals = new double[9];
 	private int trainTestRatioConstant = 10;
 	private Map<String, double[]> tokenVectorMap = new HashMap<String, double[]>();
-	private boolean readSerializedWordVecGoogleModel = false;
+	private boolean readSerializedWordVecGoogleModel = false; //private boolean writeGrctcDataWord2VecMap = "";
 	private String savedGRCTCDataWord2VecMap = "src/test/resources/data/Sequence/grctc/grctcDataWordVectorMap.vecMap";
 	private String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
 
@@ -40,16 +40,18 @@ public class GRCTCClassificationData extends DataSet {
 	}
 
 	public void setDataSet(){
+		training = new ArrayList<Sequence>();
+		testing = new ArrayList<Sequence>();
 		if(readSerializedWordVecGoogleModel){
 			setWord2VecGoogleModel();
 		} else {
 			System.err.print("Reading serialized GRCTC word2vec map . . .");
 			setTokenVectorMap();
-			System.err.print("Done");
+			System.err.println("Done");
 		}
 		System.err.print("Reading data...");
 		readData(grctcDataFilePath);
-		System.err.print("Done");
+		System.err.println("Done");
 		setDimensions();
 	}
 
@@ -110,7 +112,7 @@ public class GRCTCClassificationData extends DataSet {
 			inputSeq = inputWordVectors.toArray(inputSeq);
 			double[][] targetSeq = new double[inputWordVectors.size()][];
 			for(int k=0; k<targetSeq.length; k++) {
-				targetSeq[k] = target;
+				targetSeq[k] = target; //make it null to use the error just at last
 			}
 			targetSeq[targetSeq.length-1] = target;
 			Sequence seq = new Sequence(inputSeq, targetSeq);
@@ -156,7 +158,8 @@ public class GRCTCClassificationData extends DataSet {
 			for(int i=0; i<networkOutput.length; i++){
 				networkOutput[i] = Math.round(networkOutput[i]);
 			}
-			boolean equal = true;
+			boolean equal = true; 
+			totalSteps++;// + seq.inputSeq.length;
 			for(int i=0; i<networkOutput.length; i++){
 				if(networkOutput[i] == 1.0){
 					predictedTotalClassTotals[i]++;
@@ -176,7 +179,7 @@ public class GRCTCClassificationData extends DataSet {
 		for(int classIndex=0; classIndex<predictedCorrectClassTotals.length; classIndex++){
 			report.append("Class " + (classIndex+1) + ": ");
 			report.append("Precision: " + predictedCorrectClassTotals[classIndex]/predictedTotalClassTotals[classIndex] + " ");
-			report.append("Recall: " + predictedCorrectClassTotals[classIndex]/actualClassTestTotals[classIndex] + " ");
+			report.append("Recall: " + predictedCorrectClassTotals[classIndex]/actualClassTestTotals[classIndex] + " \n");
 			predictedCorrectClassTotals[classIndex] = 0;
 			predictedTotalClassTotals[classIndex] = 0;
 		}			

@@ -10,7 +10,9 @@ import edu.insight.unlp.nn.NNImpl;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.af.Linear;
 import edu.insight.unlp.nn.af.Sigmoid;
+import edu.insight.unlp.nn.data.GRCTCClassificationData;
 import edu.insight.unlp.nn.data.SentimentClassificationOneHotVecCharData;
+import edu.insight.unlp.nn.data.SuggestionClassificationData;
 import edu.insight.unlp.nn.data.TemporalXORData;
 import edu.insight.unlp.nn.data.TemporalXORHeatonData;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
@@ -20,10 +22,9 @@ import edu.insight.unlp.nn.rnn.FullyConnectedRNNLayer;
 public class RNNExample {
 
 	public static void main(String[] args) {
-		System.err.print("Reading data...");
-		DataSet dataset = new SentimentClassificationOneHotVecCharData();
-		System.err.println("Done");
-		
+	//	System.err.print("Reading data...");
+		DataSet dataset = new GRCTCClassificationData();
+		//System.err.println("Done");
 		NN nn = new NNImpl(new SquareErrorFunction());
 		NNLayer outputLayer = new FullyConnectedFFLayer(dataset.outputUnits, new Sigmoid(), nn);
 		NNLayer hiddenLayer = new FullyConnectedRNNLayer(35, new Sigmoid(), nn);
