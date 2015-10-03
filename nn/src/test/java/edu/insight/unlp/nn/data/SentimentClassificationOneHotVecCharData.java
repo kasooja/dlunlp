@@ -111,7 +111,7 @@ public class SentimentClassificationOneHotVecCharData extends DataSet {
 				inputSeq = inputCharVectors.toArray(inputSeq);
 				Sequence seq = new Sequence(inputSeq, targetSeq);
 				int[] randArray = new Random().ints(1, 0, trainTestRatioConstant).toArray();
-				if(randArray[0] == 0){
+				if(randArray[0] == -1){
 					testing.add(seq);
 					actualClassTestTotals[classIndex]++;					
 				} else {

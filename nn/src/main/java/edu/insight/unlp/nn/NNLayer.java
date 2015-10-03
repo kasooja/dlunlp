@@ -93,8 +93,8 @@ public abstract class NNLayer {
 			weightMatrix.biasMultiplier = (prevLayerUnits+1+numUnits);
 		}
 		weightMatrix.weights = new double[totalWeightParams];
-		WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 0.0);
-		//WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
+		//WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, 0.0);
+		WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
 		//all other biases to zero in every case, set forget bias to 1.0, as described here: http://jmlr.org/proceedings/papers/v37/jozefowicz15.pdf
 		//WeightInitializer.randomInitializeLeCun(weightMatrix, null);
 		weightMatrix.deltas = new double[totalWeightParams];

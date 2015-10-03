@@ -22,7 +22,7 @@ public class MLPExample {
 		
 		NN nn = new NNImpl(new SquareErrorFunction());
 		NNLayer outputLayer = new FullyConnectedFFLayer(dataset.outputUnits, new Sigmoid(), nn);		
-		NNLayer hiddenLayer = new FullyConnectedFFLayer(40, new Sigmoid(), nn);		
+		NNLayer hiddenLayer = new FullyConnectedFFLayer(10, new Sigmoid(), nn);		
 		NNLayer inputLayer = new FullyConnectedFFLayer(dataset.inputUnits, new Linear(), nn);
 		List<NNLayer> layers = new ArrayList<NNLayer>();
 		layers.add(inputLayer);

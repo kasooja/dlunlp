@@ -18,7 +18,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	private WeightMatrix inputGateMatrix;
 	private WeightMatrix forgetGateMatrix;
 	private WeightMatrix outputGateMatrix;
-	
+
 	private Map<Integer, double[]> lastOutputGateDerivatives,  lastForgetGateDerivatives, lastInputGateDerivatives;
 
 	private Map<Integer, double[]> lastOutputGateActivations, lastInputGateActivations, lastForgetGateActivations;
@@ -36,12 +36,12 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		afForgetGate = new Sigmoid();
 		afOutputGate = new Sigmoid();
 		afCellOutput = new Tanh();
-		
+
 		weightMatrix = new WeightMatrix();
 		inputGateMatrix = new WeightMatrix();
 		forgetGateMatrix = new WeightMatrix();
 		outputGateMatrix = new WeightMatrix();
-		
+
 	}
 
 	public FullyConnectedLSTMLayer(int numUnits, NN nn) {
@@ -72,7 +72,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		for(int i=0; i<eg.length-1; i++){
 			eg[i] = eg[i] + nextStageOutputError[i];
 		}
-
+		double[] finalEgPrevLayer = eg;
 		int currentIndex = nn.getLayers().indexOf(this);
 		if(currentIndex!=0){
 			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
@@ -107,7 +107,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			double[] egInputGate = errorGradient(eg, inputGateLambda, prevLayer.lastActivations().get(activationCounter), 
 					lastActivations.get(activationCounter-1), inputGateMatrix);
 
-			double[] finalEgPrevLayer = new double[prevLayerUnits + 1];
+			finalEgPrevLayer = new double[prevLayerUnits + 1];
 			double[] finalEgPrevStage = new double[numUnits + 1];
 
 			for(int i=0; i<prevLayerUnits; i++){
@@ -125,16 +125,31 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			nextStageOutputError = finalEgPrevStage;
 
 			for(int i=0; i<numUnits; i++){
-				nextStageCellStateError[i] = lastForgetGateActivations.get(activationCounter)[i] * eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i]; 
+				nextStageCellStateError[i] = lastForgetGateActivations.get(activationCounter)[i] * (eg[i] * lastOutputGateActivations.get(activationCounter)[i] * cellStateDerivatives[i] + nextStageCellStateError[i]); 
 			}
 			nextStageCellStateError[numUnits] = eg[eg.length - 1];
-			activationCounter--;
-			return finalEgPrevLayer;
-		} else {
-			activationCounter--;
-			return eg;
-		}
+		} 
+		resetActivationAndDerivatives(activationCounter);
+		activationCounter--;
+		return finalEgPrevLayer;
 	}
+
+	private void resetActivationAndDerivatives(int activationCounter){
+		lastActivations.put(activationCounter, null);
+		lastActivationDerivatives.put(activationCounter, null);
+
+		lastOutputGateDerivatives.put(activationCounter,  null); 
+		lastForgetGateDerivatives.put(activationCounter,  null); 
+		lastInputGateDerivatives.put(activationCounter,  null);
+
+		lastOutputGateActivations.put(activationCounter,  null); 
+		lastInputGateActivations.put(activationCounter,  null);
+		lastForgetGateActivations.put(activationCounter,  null);
+
+		cellStateLastActivations.put(activationCounter,  null); 
+		lastCellStateInputActivations.put(activationCounter,  null);
+	}
+
 
 	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {
 		double signals[] = new double[numUnits];
@@ -205,7 +220,6 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 			IntStream.range(0, inputGateSignals.length).forEach(i -> inputGateDerivatives[i] = afInputGate.activationDerivative(inputGateSignals[i]));
 			lastInputGateDerivatives.put(activationCounter, inputGateDerivatives);
 
-
 			//storing outputGateActivations
 			lastOutputGateActivations.put(activationCounter, outputGateActivations);
 
@@ -229,12 +243,12 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		lastOutputGateActivations = new HashMap<Integer, double[]>();
 		lastInputGateActivations = new HashMap<Integer, double[]>();
 		lastForgetGateActivations = new HashMap<Integer, double[]>();
-		
+
 		cellStateLastActivations = new HashMap<Integer, double[]>();
 		cellStateLastActivations.put(-1, new double[numUnits]);
 
 		lastCellStateInputActivations = new HashMap<Integer, double[]>();
-		
+
 		nextStageOutputError = new double[numUnits + 1];
 		nextStageCellStateError = new double[numUnits+1];
 

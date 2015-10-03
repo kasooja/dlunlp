@@ -18,10 +18,11 @@ public class FullyConnectedFFLayer extends NNLayer {
 	@Override
 	public double[] errorGradient(double[] eg) {
 		int currentIndex = nn.getLayers().indexOf(this);
+		double[] egPrevLayer = eg;
 		if(currentIndex!=0){
 			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
 			double[] prevLayerActivations = prevLayer.lastActivations().get(activationCounter);
-			double[] egPrevLayer = new double[prevLayerActivations.length + 1];
+			egPrevLayer = new double[prevLayerActivations.length + 1];
 			double[] deriv = lastActivationDerivatives.get(activationCounter);
 			for(int i=0; i<eg.length-1; i++){
 				int currentWeightIndex = i * (prevLayerActivations.length + 1);
@@ -35,15 +36,17 @@ public class FullyConnectedFFLayer extends NNLayer {
 					egPrevLayer[j] = egPrevLayer[j] + lambda * weightMatrix.weights[currentWeightIndex + j + 1];
 				}
 			}
-			lastActivations.put(activationCounter, null);
-			lastActivationDerivatives.put(activationCounter, null);
 			egPrevLayer[prevLayerActivations.length] = eg[eg.length-1];
-			activationCounter--;
-			return egPrevLayer;
-		} else {
-			activationCounter--;
-			return eg;
-		}
+		} 
+		resetActivationAndDerivatives(activationCounter);
+		activationCounter--;
+		return egPrevLayer;
+	}
+
+	private void resetActivationAndDerivatives(int activationCounter){
+		lastActivations.put(activationCounter, null);
+		if(prevLayerUnits!=-1)
+			lastActivationDerivatives.put(activationCounter, null);
 	}
 
 	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations){ //MLP does not require its activations for feedback, so not used in the method for computing signals

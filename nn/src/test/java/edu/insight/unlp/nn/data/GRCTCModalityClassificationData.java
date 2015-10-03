@@ -9,11 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
-
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
-
 import weka.core.Instance;
 import weka.core.Instances;
 import edu.insight.unlp.nn.DataSet;
@@ -21,7 +19,7 @@ import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
-public class GRCTCClassificationData extends DataSet {
+public class GRCTCModalityClassificationData extends DataSet {
 
 	private static Word2Vec vec = null;
 	private static File gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
@@ -35,7 +33,7 @@ public class GRCTCClassificationData extends DataSet {
 	private String savedGRCTCDataWord2VecMap = "src/test/resources/data/Sequence/grctc/grctcDataWordVectorMap.vecMap";
 	private String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
 
-	public GRCTCClassificationData() {
+	public GRCTCModalityClassificationData() {
 		setDataSet();
 	}
 
