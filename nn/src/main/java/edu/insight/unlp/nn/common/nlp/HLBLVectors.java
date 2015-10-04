@@ -30,6 +30,11 @@ public class HLBLVectors {
 			e.printStackTrace();
 		}
 	}
+	
+	public static double[] getWordVector(String word){
+		return vecs.get(word);
+	}
+	
 }
 
 

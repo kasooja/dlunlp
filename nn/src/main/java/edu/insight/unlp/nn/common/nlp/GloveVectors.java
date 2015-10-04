@@ -31,6 +31,10 @@ public class GloveVectors {
 		}
 	}
 	
+	public static double[] getWordVector(String word){
+		return vecs.get(word);
+	}
+	
 	public static void main(String[] args) {
 		double[] ds = vecs.get("the");
 		for(double j : ds){
