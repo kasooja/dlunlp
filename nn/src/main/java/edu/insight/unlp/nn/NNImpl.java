@@ -65,7 +65,7 @@ public class NNImpl implements NN {
 				eg[i] = errors;
 			totalLoss = totalLoss + errors[errors.length-1];
 			totalSteps++;
-			target[i++] = activations;
+			target[i] = activations;
 			i++;
 		}
 		return target;

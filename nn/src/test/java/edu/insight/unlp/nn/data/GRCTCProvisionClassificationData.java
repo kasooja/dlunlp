@@ -38,7 +38,6 @@ public class GRCTCProvisionClassificationData extends DataSet {
 	private String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
 	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 
-	
 	public GRCTCProvisionClassificationData() {
 		setDataSet();
 	}
@@ -74,9 +73,11 @@ public class GRCTCProvisionClassificationData extends DataSet {
 	private void setDimensions(){
 		inputUnits = training.get(0).inputSeq[0].length;
 		for(Sequence seq : training) {
-			if(seq.target!=null){		
-				outputUnits = seq.target[0].length;
-				break;
+			for(double[] target : seq.target){
+				if(target!=null){
+					outputUnits = target.length;
+					break;
+				}
 			}
 		}
 	}
@@ -116,7 +117,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 			inputSeq = inputWordVectors.toArray(inputSeq);
 			double[][] targetSeq = new double[inputWordVectors.size()][];
 			for(int k=0; k<targetSeq.length; k++) {
-				targetSeq[k] = target; //make it null to use the error just at last
+				targetSeq[k] = null;//target; //make it null to use the error just at last
 			}
 			targetSeq[targetSeq.length-1] = target;
 			Sequence seq = new Sequence(inputSeq, targetSeq);
