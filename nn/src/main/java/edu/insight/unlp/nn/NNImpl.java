@@ -13,8 +13,10 @@ public class NNImpl implements NN {
 	protected List<NNLayer> layers;
 	protected ErrorFunction ef;
 
-	private double totalLoss = 0.0;
-	private double totalSteps = 0.0;
+	public double totalLoss = 0.0;
+	public double totalSteps = 0.0;
+
+	private double[][] eg;
 
 	public NNImpl(ErrorFunction ef){
 		this.ef = ef;
@@ -38,7 +40,7 @@ public class NNImpl implements NN {
 		totalSteps = 0.0;
 		resetActivationCounter(true);
 		for(Sequence seq : training){
-			double[][] eg = ffError(seq);//new double[networkOutput.length][];
+			ff(seq, ef, true);
 			bp(eg);
 			update(learningRate);
 			resetActivationCounter(true);
@@ -46,21 +48,27 @@ public class NNImpl implements NN {
 		return totalLoss/totalSteps;
 	}
 
-	private double[][] ffError(Sequence seq){
-		double[][] eg = new double[seq.inputSeq.length][];
+	@Override
+	public double[][] ff(Sequence seq, ErrorFunction ef, boolean applyTraining) {
 		int i = 0;
+		double[][] target = new double[seq.inputSeq.length][];
+		if(applyTraining)
+			eg = new double[seq.inputSeq.length][];
 		for(double[] input : seq.inputSeq){
 			double[] activations = null;
 			activations = input;		
 			for(NNLayer layer : layers){
 				activations = layer.computeActivations(activations, true);
 			}
-			eg[i] = ef.error(seq.target[i], activations);
-			totalLoss = totalLoss + eg[i][eg[i].length-1];
+			double[] errors = ef.error(seq.target[i], activations);
+			if(applyTraining)
+				eg[i] = errors;
+			totalLoss = totalLoss + errors[errors.length-1];
 			totalSteps++;
+			target[i++] = activations;
 			i++;
 		}
-		return eg;
+		return target;
 	}
 
 	private void bp(double[][] errorGradient){
@@ -108,19 +116,15 @@ public class NNImpl implements NN {
 		return layers;
 	}
 
+
+	public void resetError(){
+		totalLoss = 0.0;
+		totalSteps = 0.0;
+	}
+
 	@Override
-	public double[][] output(double[][] inputSeq) {
-		double[][] target = new double[inputSeq.length][];
-		double[] result = null;
-		int i = 0;
-		for(double[] input : inputSeq){
-			result = input;		
-			for(NNLayer layer : layers){
-				result = layer.computeActivations(result, false);
-			}
-			target[i++] = result;
-		}
-		return target;
+	public double getError() {
+		return totalLoss/totalSteps;
 	}
 
 }

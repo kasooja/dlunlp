@@ -17,8 +17,10 @@ import org.deeplearning4j.util.SerializationUtils;
 import weka.core.Instance;
 import weka.core.Instances;
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCProvisionClassificationData extends DataSet {
@@ -34,7 +36,9 @@ public class GRCTCProvisionClassificationData extends DataSet {
 	private boolean readSerializedWordVecGoogleModel = false; //private boolean writeGrctcDataWord2VecMap = "";
 	private String savedGRCTCDataWord2VecMap = "src/test/resources/data/Sequence/grctc/grctcDataWordVectorMap.vecMap";
 	private String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 
+	
 	public GRCTCProvisionClassificationData() {
 		setDataSet();
 	}
@@ -148,12 +152,13 @@ public class GRCTCProvisionClassificationData extends DataSet {
 
 	@Override
 	public String evaluateTest(NN nn) {
+		nn.resetError();
 		StringBuilder report = new StringBuilder();
 		int totalSteps = 0;
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
 			double[] actualOutput = seq.target[seq.target.length - 1];
-			double[][] output = nn.output(seq.inputSeq);
+			double[][] output = nn.ff(seq, reportingLoss, false);
 			double[] networkOutput = new double[actualOutput.length];
 			for(int m=0; m<output.length; m++){
 				for(int k=0; k<output[0].length; k++){
@@ -191,8 +196,10 @@ public class GRCTCProvisionClassificationData extends DataSet {
 			report.append("Recall: " + predictedCorrectClassTotals[classIndex]/actualClassTestTotals[classIndex] + " \n");
 			predictedCorrectClassTotals[classIndex] = 0;
 			predictedTotalClassTotals[classIndex] = 0;
-		}			
+		}
+		report.append("Test Loss: " + nn.getError() + "\n");
 		report.append("Overall Accuracy: " + (int)(correctlyClassified) + "\n");
+		nn.resetError();
 		return report.toString();
 	}
 

@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Random;
 
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 
 /**
  * Utility class that presents the XOR operator as a serial stream of values.
@@ -49,9 +51,9 @@ public class TemporalXORHeatonData extends DataSet {
 	private static Random rng = new Random();
 	private static int sequenceMinLength = 4;
 	private static int sequenceMaxLength = 7;
-
 	private static int trainingSeqs = 1000;
 	private static int testingSeqs = 100;
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 
 	public TemporalXORHeatonData(){
 		setDataSet();
@@ -102,7 +104,7 @@ public class TemporalXORHeatonData extends DataSet {
 		for(Sequence seq : testing) {
 			double[][] inputSeq = seq.inputSeq;
 			double[][] target = seq.target;
-			double[][] output = nn.output(inputSeq);
+			double[][] output = nn.ff(seq, reportingLoss, false);
 			totalSteps = totalSteps +  inputSeq.length;
 			for(double[] out : output){
 				out[0] = Math.round(out[0]);

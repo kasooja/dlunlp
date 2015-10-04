@@ -9,14 +9,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
+
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
+
 import weka.core.Instance;
 import weka.core.Instances;
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCModalityClassificationData extends DataSet {
@@ -32,6 +36,7 @@ public class GRCTCModalityClassificationData extends DataSet {
 	private boolean readSerializedWordVecGoogleModel = false; //private boolean writeGrctcDataWord2VecMap = "";
 	private String savedGRCTCDataWord2VecMap = "src/test/resources/data/Sequence/grctc/grctcDataWordVectorMap.vecMap";
 	private String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 
 	public GRCTCModalityClassificationData() {
 		setDataSet();
@@ -151,7 +156,7 @@ public class GRCTCModalityClassificationData extends DataSet {
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
 			double[] actualOutput = seq.target[seq.target.length - 1];
-			double[][] output = nn.output(seq.inputSeq);
+			double[][] output = nn.ff(seq, reportingLoss, false);
 			double[] networkOutput = new double[actualOutput.length];
 			for(int m=0; m<output.length; m++){
 				for(int k=0; k<output[0].length; k++){

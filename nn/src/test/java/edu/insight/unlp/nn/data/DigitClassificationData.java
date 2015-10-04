@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class DigitClassificationData extends DataSet {
@@ -16,9 +18,10 @@ public class DigitClassificationData extends DataSet {
 	private String traintargetsFile = "src/test/resources/data/DigitClassifier/trainData/traintargets";
 	private String testdataFile = "src/test/resources/data/DigitClassifier/testData/testdata";
 	private String testtargetsFile = "src/test/resources/data/DigitClassifier/testData/testtargets";
-	
 	private static int dataVectorSize = 256;
 	private static int targetVectorSize = 10;
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
+
 
 	public DigitClassificationData(){
 		setDataSet();
@@ -106,7 +109,7 @@ public class DigitClassificationData extends DataSet {
 		int totalSteps = 0;	
 		StringBuilder report = new StringBuilder();
 		for(Sequence seq : testing){
-			int recognizedDigit = argmax(nn.output(seq.inputSeq)[0]);
+			int recognizedDigit = argmax(nn.ff(seq, reportingLoss, false)[0]);
 			int actualDigit = argmax(seq.target[0]);
 			if (recognizedDigit == actualDigit) {
 				totalCorrect++;

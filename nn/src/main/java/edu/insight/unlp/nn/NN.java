@@ -22,6 +22,11 @@ public interface NN {
 	
 	public double sgdTrain(List<Sequence> training, double learningRate, boolean shuffle);
 	
-	public double[][] output(double[][] inputSeq);
+	public double[][] ff(Sequence seq, ErrorFunction ef, boolean applyTraining);
+	
+	public void resetError();
+	
+	public double getError();
+
 
 }

@@ -9,12 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
+
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
 import org.deeplearning4j.util.SerializationUtils;
+
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class SentimentClassificationWordVecData extends DataSet {
@@ -31,6 +35,7 @@ public class SentimentClassificationWordVecData extends DataSet {
 	private int trainTestRatioConstant = 10;
 	public boolean readSerializedWordVecModel = true;
 	public String savedSentimentDataWord2VecModel = "src/test/resources/data/Sequence/sentiment/sentimentWikiWord.vecMap";
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 
 	public SentimentClassificationWordVecData() {
 		setDataSet();
@@ -126,7 +131,7 @@ public class SentimentClassificationWordVecData extends DataSet {
 		int totalSteps = 0;
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
-			double[][] output = nn.output(seq.inputSeq);
+			double[][] output = nn.ff(seq, reportingLoss, false);
 			double[] actualOutput = seq.target[seq.target.length-1];
 			double[] netOutput = output[output.length-1];
 			int winnerIndex = 0;

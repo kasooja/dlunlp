@@ -15,8 +15,10 @@ import org.deeplearning4j.util.SerializationUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 
 public class SuggestionClassificationData extends DataSet{
 
@@ -30,6 +32,7 @@ public class SuggestionClassificationData extends DataSet{
 	private boolean readSerializedWordVecGoogleModel = false;
 	private String savedSuggestionDataWord2VecModel = "src/test/resources/data/Sequence/suggestion/word2vecElectronics.model";
 	private String electronicsDataFilePath = "src/test/resources/data/Sequence/suggestion/electronics.csv";
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 	
 	public SuggestionClassificationData() {
 		setDataSet();
@@ -146,7 +149,7 @@ public class SuggestionClassificationData extends DataSet{
 		int totalSteps = 0;
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
-			double[][] output = nn.output(seq.inputSeq);
+			double[][] output = nn.ff(seq, reportingLoss, false);
 			double[] networkOutput = output[output.length -1];
 			double[] actualOutput = seq.target[seq.target.length-1];
 			int winnerIndex = 0;

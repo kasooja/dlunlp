@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+
 import edu.insight.unlp.nn.DataSet;
+import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
+import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class SentimentClassificationOneHotVecCharData extends DataSet {
@@ -25,6 +28,7 @@ public class SentimentClassificationOneHotVecCharData extends DataSet {
 	private String posSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.pos";
 	private String negSentDataDirPath = "src/test/resources/data/Sequence/sentiment/rt-polaritydata/rt-polarity.neg";
 	private int trainTestRatioConstant = 10;
+	private static ErrorFunction reportingLoss = new SquareErrorFunction();
 
 	public SentimentClassificationOneHotVecCharData() {
 		setDataSet();
@@ -130,7 +134,7 @@ public class SentimentClassificationOneHotVecCharData extends DataSet {
 		int totalSteps = 0;
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
-			double[][] output = nn.output(seq.inputSeq);
+			double[][] output = nn.ff(seq, reportingLoss, false);
 			double[] actualOutput = seq.target[seq.target.length-1];
 			double[] netOutput = output[output.length-1];
 			totalSteps = totalSteps + seq.inputSeq.length;
