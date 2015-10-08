@@ -180,7 +180,7 @@ public class SuggestionClassificationData extends DataSet{
 			double[] actualOutput = seq.target[seq.target.length-1];
 			int winnerIndex = 0;
 			double max = Double.MIN_VALUE;
-			totalSteps = totalSteps + seq.inputSeq.length;
+			totalSteps++;
 			for(int i=0; i<networkOutput.length; i++) {
 				if(networkOutput[i]>max){
 					max = networkOutput[i];
@@ -207,15 +207,18 @@ public class SuggestionClassificationData extends DataSet{
 			}
 			nn.resetActivationCounter(false);				
 		}
-		double correctlyClassified = ((double)totalCorrect/(double)totalSteps) * 100;  
+		double correctlyClassified = ((double) totalCorrect/(double)totalSteps) * 100;  
 		for(int classIndex=0; classIndex<predictedCorrectClassTotals.length; classIndex++){
 			report.append("Class " + (classIndex+1) + ": ");
 			report.append("Precision: " + predictedCorrectClassTotals[classIndex]/predictedTotalClassTotals[classIndex] + " ");
 			report.append("Recall: " + predictedCorrectClassTotals[classIndex]/actualClassTestTotals[classIndex] + " ");
+			report.append("Predict-count, Actual-count: " + predictedTotalClassTotals[classIndex] + " " + actualClassTestTotals[classIndex] + " \n");
 			predictedCorrectClassTotals[classIndex] = 0;
 			predictedTotalClassTotals[classIndex] = 0;
 		}			
+		report.append("Test Loss: " + nn.getError() + "\n");
 		report.append("Overall Accuracy: " + (int)(correctlyClassified) + "\n");
+		nn.resetError();
 		return report.toString();
 	}
 
