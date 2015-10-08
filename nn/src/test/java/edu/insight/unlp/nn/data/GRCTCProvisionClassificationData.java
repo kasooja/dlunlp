@@ -343,8 +343,6 @@ public class GRCTCProvisionClassificationData extends DataSet {
 					featureExtension[i] = val; 
 				} 
 			}
-
-			
 			
 			text = instance.stringValue(instance.attribute(9)).toLowerCase();
 			text = text.toLowerCase();
@@ -388,6 +386,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 							finalFeatureVector[counter++] = w;
 						}
 						inputWordVectors.add(finalFeatureVector);
+		//				inputWordVectors.add(wordVector);
 						tokenVectorMap.put(token, wordVector);
 					} else {
 						notFound.add(token);
@@ -458,11 +457,11 @@ public class GRCTCProvisionClassificationData extends DataSet {
 			}
 		}
 		
-//		for(String token : notFound){
-//			if(!token.matches(".*\\d.*")){
-//				System.out.println(token);
-//			}
-//		}
+		for(String token : notFound){
+			if(!token.matches(".*\\d.*")){
+				System.out.println(token);
+			}
+		}
 		System.err.println("\nNot Found" + notFound.size() + "/" + (tokenVectorMap.size() + notFound.size()));
 	}
 
@@ -497,7 +496,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 			//			for(int k=0; k<output[0].length; k++){
 			//				networkOutput[k] = networkOutput[k]/output.length;
 			//			}
-			double threshold = 0.49;
+			double threshold = 0.6;
 			boolean someOneGot = false;
 			for(int i=0; i<networkOutput.length; i++){
 				if(networkOutput[i]>threshold){
@@ -521,15 +520,17 @@ public class GRCTCProvisionClassificationData extends DataSet {
 						networkOutput[i] = 1.0;
 					}
 				}
-			} else {
-				for(int i=0; i<networkOutput.length; i++){
-					if(networkOutput[i]>threshold){
-						networkOutput[i] = 1.0;
-					} else {
-						networkOutput[i] = 0.0;
-					}
-				}
-			}
+			} 
+			
+//			if(someOneGot) {
+//				for(int i=0; i<networkOutput.length; i++){
+//					if(networkOutput[i]>threshold){
+//						networkOutput[i] = 1.0;
+//					} else {
+//						networkOutput[i] = 0.0;
+//					}
+//				}
+//			}
 
 			boolean equal = true; 
 			totalSteps++;// + seq.inputSeq.length;

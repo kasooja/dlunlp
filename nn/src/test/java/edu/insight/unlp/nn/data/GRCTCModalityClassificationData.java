@@ -415,7 +415,8 @@ public class GRCTCModalityClassificationData extends DataSet {
 						for(double w : featureExtension){
 							finalFeatureVector[counter++] = w;
 						}
-						inputWordVectors.add(finalFeatureVector);
+						//inputWordVectors.add(finalFeatureVector);
+						inputWordVectors.add(wordVector);
 						tokenVectorMap.put(token, wordVector);
 					} else {
 						notFound.add(token);
