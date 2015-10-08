@@ -12,10 +12,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.deeplearning4j.util.SerializationUtils;
-
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -29,15 +25,13 @@ import edu.insight.unlp.nn.DataSet;
 import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.common.Sequence;
-import edu.insight.unlp.nn.common.nlp.GloveVectors;
-import edu.insight.unlp.nn.common.nlp.HLBLVectors;
+import edu.insight.unlp.nn.common.nlp.Word2Vector;
 import edu.insight.unlp.nn.ef.SquareErrorFunction;
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GRCTCProvisionClassificationData extends DataSet {
 
-	private static Word2Vec word2vecGoogle = null;
-	private static File gModel;
+	private Word2Vector word2vec;
 	private double[] actualClassTestTotals = new double[9]; 
 	private double[] actualClassTrainingTotals = new double[9];
 	private double[] predictedCorrectClassTotals = new double[9];
@@ -46,15 +40,8 @@ public class GRCTCProvisionClassificationData extends DataSet {
 	private Map<String, double[]> tokenVectorMap = new HashMap<String, double[]>();
 	private String grctcDataFilePath = "src/test/resources/data/Sequence/grctc/USUKAMLAll9Labels_all.arff";
 	private static ErrorFunction reportingLoss = new SquareErrorFunction();
-	private boolean readSerializedWordVecGoogleModel = false;
-	private boolean readSerializedTokenVectorMap = false;
-	private boolean readGloveVectors = true;
-	private boolean readHLBLVectors = false;
 	private static Map<String, String> wrongWords = new HashMap<String, String>();
 	private static List<String> labels = new ArrayList<String>();
-
-	//private boolean serializeTokenVectorMap = false;
-	private String serializedGRCTCProvisionWord2VecGoogleMap = "src/test/resources/data/Sequence/grctc/serializedGRCTCProvisionWord2VecGoogleMap";
 
 	static {
 		wrongWords.put("personmaymake", "person may make");
@@ -106,7 +93,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 		wrongWords.put("aﬀected", "affected");
 	}
 
-	public GRCTCProvisionClassificationData() {
+	public GRCTCProvisionClassificationData(Word2Vector word2vec) {
 		labels.add("Customer Due Diligence_Class");
 		labels.add("Enforcement_Class");
 		labels.add("Monitoring_Class");
@@ -116,39 +103,17 @@ public class GRCTCProvisionClassificationData extends DataSet {
 		labels.add("Defences_Class");
 		labels.add("Record-keeping_Class");
 		labels.add("Internal Programme_Class");
+		this.word2vec = word2vec;
 		setDataSet();
 	}
 
 	public void setDataSet(){
 		training = new ArrayList<Sequence>();
 		testing = new ArrayList<Sequence>();
-		if(readSerializedWordVecGoogleModel){
-			System.err.print("Reading GoogleNews-vectors-negative300.bin . . .");
-			setWord2VecGoogleModel();
-			System.err.println("Done");
-		}
-		if(readSerializedTokenVectorMap){
-			System.err.print("Reading serialized GRCTC TokenVectorMap  . . .");
-			setTokenVectorMap(serializedGRCTCProvisionWord2VecGoogleMap);
-			System.err.println("Done");
-		}
 		System.err.print("Reading data...");
 		readDataExtendedFeatures(grctcDataFilePath);
 		System.err.println("Done");
 		setDimensions();
-	}
-
-	private void setWord2VecGoogleModel(){
-		try {
-			gModel = new File("/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz");
-			word2vecGoogle = WordVectorSerializer.loadGoogleModel(gModel, true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}	
-	}
-
-	private void setTokenVectorMap(String serializedGRCTCProvisionTokenVectorMap){
-		tokenVectorMap = SerializationUtils.readObject(new File(serializedGRCTCProvisionTokenVectorMap));
 	}
 
 	private void setDimensions(){
@@ -187,13 +152,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 					if(tokenVectorMap.containsKey(token)){
 						wordVector = tokenVectorMap.get(token);
 					} else {
-						if(readSerializedWordVecGoogleModel){
-							wordVector = word2vecGoogle.getWordVector(token);
-						} else if(readGloveVectors){
-							wordVector = GloveVectors.getWordVector(token);
-						} else if(readHLBLVectors){
-							wordVector = HLBLVectors.getWordVector(token);
-						}
+						wordVector =  word2vec.getWordVector(token);
 					}
 					if(wordVector!=null){
 						inputWordVectors.add(wordVector);
@@ -234,7 +193,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 	private void readDataExtendedFeatures(String grctcDataFilePath) {
 		Set<String> notFound = new HashSet<String>();
 		Instances instances = loadWekaData(grctcDataFilePath);
-		
+
 		ArrayList<Attribute> atts = new ArrayList<Attribute>();
 		Attribute textAttribute = new Attribute("text", (ArrayList<String>) null);		
 		Attribute arkFramesAttribute = new Attribute("arkFrames", (ArrayList<String>) null);
@@ -243,7 +202,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 		atts.add(textAttribute);		
 		atts.add(arkFramesAttribute);
 		atts.add(posTagSeqAttribute);
-		
+
 		Instances multiClassInstances = null;
 		multiClassInstances  = new Instances("FiroProvisionInstances: -C 1", atts, 0);
 		for(Instance instance : instances){
@@ -252,7 +211,6 @@ public class GRCTCProvisionClassificationData extends DataSet {
 				if(!instance.attribute(i).isString()) {
 					double value = instance.value(instance.attribute(i));
 					if(value==1.0){
-						String label = labels.get(i);
 						labelIndex = i;
 						break;
 					}				
@@ -269,8 +227,8 @@ public class GRCTCProvisionClassificationData extends DataSet {
 			Instance newInstance = new DenseInstance(1.0, vals);
 			multiClassInstances.add(newInstance);
 		}
-		
-		
+
+
 		AttributeSelection attrSel = Commons.getAttributeSelectionFilter();		
 		StringToWordVector textStringToWordVectorFilter = Commons.getStringToWordVectorFilter();		
 		StringToWordVector posStringToWordVectorFilter = Commons.getStringToWordVectorFilter();
@@ -304,7 +262,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 		Instances selectedAttsInstances = null;
 		try {
 			multiFilter.setInputFormat(multiClassInstances);
-		//	copyInstances.setClass(copyInstances.attribute(0));;
+			//	copyInstances.setClass(copyInstances.attribute(0));;
 			Instances filteredCopyInstances = Filter.useFilter(multiClassInstances,  multiFilter);
 			filteredCopyInstances.setClassIndex(0);
 			attrSel.setInputFormat(filteredCopyInstances);
@@ -313,11 +271,11 @@ public class GRCTCProvisionClassificationData extends DataSet {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}	
-		
+
 		int selectCounter = 0;
 		for(Instance instance: instances){
 			Instance selectedAttsInstance = selectedAttsInstances.get(selectCounter++);
-			
+
 			double[] target = new double[9];
 			String text = null;
 			for(int i=0; i<instance.numAttributes()-3; i++){
@@ -333,8 +291,8 @@ public class GRCTCProvisionClassificationData extends DataSet {
 					labelSet.add(label);	
 				}
 			}
-			
-			
+
+
 			int numAttributes = selectedAttsInstance.numAttributes();
 			double[] featureExtension = new double[numAttributes-1];	
 			for(int i=0; i<selectedAttsInstance.numAttributes()-1; i++){
@@ -343,7 +301,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 					featureExtension[i] = val; 
 				} 
 			}
-			
+
 			text = instance.stringValue(instance.attribute(9)).toLowerCase();
 			text = text.toLowerCase();
 			text = text.replace("-", " ").trim();
@@ -368,13 +326,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 					if(tokenVectorMap.containsKey(token)){
 						wordVector = tokenVectorMap.get(token);
 					} else {
-						if(readSerializedWordVecGoogleModel){
-							wordVector = word2vecGoogle.getWordVector(token);
-						} else if(readGloveVectors){
-							wordVector = GloveVectors.getWordVector(token);
-						} else if(readHLBLVectors){
-							wordVector = HLBLVectors.getWordVector(token);
-						}
+						wordVector = word2vec.getWordVector(token);
 					}
 					if(wordVector!=null){
 						double[] finalFeatureVector = new double[wordVector.length + featureExtension.length];
@@ -386,7 +338,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 							finalFeatureVector[counter++] = w;
 						}
 						inputWordVectors.add(finalFeatureVector);
-		//				inputWordVectors.add(wordVector);
+						//				inputWordVectors.add(wordVector);
 						tokenVectorMap.put(token, wordVector);
 					} else {
 						notFound.add(token);
@@ -456,7 +408,7 @@ public class GRCTCProvisionClassificationData extends DataSet {
 				}
 			}
 		}
-		
+
 		for(String token : notFound){
 			if(!token.matches(".*\\d.*")){
 				System.out.println(token);
@@ -521,16 +473,16 @@ public class GRCTCProvisionClassificationData extends DataSet {
 					}
 				}
 			} 
-			
-//			if(someOneGot) {
-//				for(int i=0; i<networkOutput.length; i++){
-//					if(networkOutput[i]>threshold){
-//						networkOutput[i] = 1.0;
-//					} else {
-//						networkOutput[i] = 0.0;
-//					}
-//				}
-//			}
+
+			//			if(someOneGot) {
+			//				for(int i=0; i<networkOutput.length; i++){
+			//					if(networkOutput[i]>threshold){
+			//						networkOutput[i] = 1.0;
+			//					} else {
+			//						networkOutput[i] = 0.0;
+			//					}
+			//				}
+			//			}
 
 			boolean equal = true; 
 			totalSteps++;// + seq.inputSeq.length;
