@@ -176,7 +176,7 @@ public class SuggestionClassificationData extends DataSet{
 		int totalCorrect = 0;
 		for(Sequence seq : testing){
 			double[][] output = nn.ff(seq, reportingLoss, false);
-			double[] networkOutput = output[output.length -1];
+			double[] networkOutput = output[output.length-1];
 			double[] actualOutput = seq.target[seq.target.length-1];
 			int winnerIndex = 0;
 			double max = Double.MIN_VALUE;
