@@ -7,12 +7,12 @@ import java.util.Map;
 
 import edu.insight.unlp.nn.utils.BasicFileTools;
 
-public class GloveVectors {
+public class GloveVectors implements Word2Vector {
 
 	public static Map<String, double[]> vecs = new HashMap<String, double[]>();
-
+	public static String filePath = "src/test/resources/glove.6B.50d.txt";
+	
 	static {
-		String filePath = "src/test/resources/glove.6B.50d.txt";
 		BufferedReader br = BasicFileTools.getBufferedReader(filePath);
 		String line = null;
 		try {
@@ -31,7 +31,7 @@ public class GloveVectors {
 		}
 	}
 	
-	public static double[] getWordVector(String word){
+	public double[] getWordVector(String word){
 		return vecs.get(word);
 	}
 	
@@ -41,6 +41,7 @@ public class GloveVectors {
 			System.out.println(j);
 		}
 	}
+	
 }
 
 
