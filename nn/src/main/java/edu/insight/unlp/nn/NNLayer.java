@@ -83,20 +83,23 @@ public abstract class NNLayer {
 	}
 
 	protected void initializeLayerWeights(WeightMatrix weightMatrix, boolean feedback, double biasWeight){
-		int totalWeightParams = (prevLayerUnits+1) * numUnits;;
+		int totalWeightParams = (prevLayerUnits+1) * numUnits;
 		weightMatrix.biasMultiplier = (prevLayerUnits+1);
 		if(feedback){
 			totalWeightParams = (prevLayerUnits+1+numUnits) * numUnits;
 			weightMatrix.biasMultiplier = (prevLayerUnits+1+numUnits);
 		}
 		weightMatrix.weights = new double[totalWeightParams];
+		weightMatrix.deltas = new double[totalWeightParams];
+		weightMatrix.stepCache = new double[totalWeightParams];
+		initializeLayerWeights(weightMatrix, biasWeight);
+	}
+
+	protected void initializeLayerWeights(WeightMatrix weightMatrix, double biasWeight) {
 		WeightInitializer.randomInitializeKarapathyCode(weightMatrix, initParamsStdDev, biasWeight);
 		//WeightInitializer.constantInitialize(weightMatrix, 0.2, null);
 		//all other biases to zero in every case, set forget bias to 1.0, as described here: http://jmlr.org/proceedings/papers/v37/jozefowicz15.pdf
 		//WeightInitializer.randomInitializeLeCun(weightMatrix, null);
-		weightMatrix.deltas = new double[totalWeightParams];
-		weightMatrix.stepCache = new double[totalWeightParams];
-
 	}
 
 	public int getActivationCounterVal(){
