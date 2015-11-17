@@ -6,11 +6,14 @@ import java.util.Map;
 import edu.insight.unlp.nn.ActivationFunction;
 import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
-import edu.insight.unlp.nn.common.WeightInitializer;
 import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class Convolutional1DLayer extends NNLayer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private int[] k; //kernels
 	//private int[] kernelNumUnits; //numUnits for specific kernels
 	private WeightMatrix[] kernelWeightMatrices;
@@ -42,17 +45,16 @@ public class Convolutional1DLayer extends NNLayer {
 			int prevLayerAbstractUnits = prevLayerUnits / v;
 			int kernelFeatureMapOutputSize = prevLayerAbstractUnits - kernelSize + 1;
 			double featureMap[] = new double[kernelFeatureMapOutputSize];
-		
 			
-			
-			for(int i = 0; i < outputs.length; i++) {
-				outputs[i] = 1 * kernelWeightMatrix.weights[i * (input.length + 1)]; //the bias one, multiplied the weight by 1, so added directly to outputs
-				for (int m = 0; m < input.length; m++) {
-					outputs[i] += input[m] * kernelWeightMatrix.weights[i * (input.length + 1) + m + 1];
-				}
-			}
+//			for(int i = 0; i < outputs.length; i++) {
+//				outputs[i] = 1 * kernelWeightMatrix.weights[i * (input.length + 1)]; //the bias one, multiplied the weight by 1, so added directly to outputs
+//				for (int m = 0; m < input.length; m++) {
+//					outputs[i] += input[m] * kernelWeightMatrix.weights[i * (input.length + 1) + m + 1];
+//				}
+//			}
 		}
-		return outputs;
+		//return outputs;
+		return null;
 	}
 
 	@Override
