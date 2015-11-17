@@ -4,6 +4,11 @@ import edu.insight.unlp.nn.ActivationFunction;
 
 public class Sigmoid extends ActivationFunction {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public double activation(double input) {
 		return 1.0 / (1 + Math.exp(-input));
 	}

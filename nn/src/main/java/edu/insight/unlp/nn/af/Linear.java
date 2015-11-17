@@ -4,6 +4,8 @@ import edu.insight.unlp.nn.ActivationFunction;
 
 public class Linear extends ActivationFunction {
 
+	private static final long serialVersionUID = 1L;
+
 	@Override
 	public double activation(double input) {
 		return input;

@@ -4,6 +4,8 @@ import edu.insight.unlp.nn.ActivationFunction;
 
 public class HardTanh extends ActivationFunction {
 
+	private static final long serialVersionUID = 1L;
+
 	public double activation(double input) {
 		if(input>1.0){
 			return 1.0;

@@ -4,6 +4,10 @@ import edu.insight.unlp.nn.ActivationFunction;
 
 public class ReLU extends ActivationFunction {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static double slope = 0.05;
 	
 	public double activation(double input) {

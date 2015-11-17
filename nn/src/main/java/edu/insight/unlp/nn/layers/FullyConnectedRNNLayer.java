@@ -9,6 +9,10 @@ import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class FullyConnectedRNNLayer extends NNLayer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private double[] nextStageError;
 
 	public FullyConnectedRNNLayer(int numUnits, ActivationFunction af, NN nn) {

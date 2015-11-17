@@ -1,5 +1,6 @@
 package edu.insight.unlp.nn;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -7,8 +8,9 @@ import java.util.stream.IntStream;
 import edu.insight.unlp.nn.common.WeightInitializer;
 import edu.insight.unlp.nn.common.WeightMatrix;
 
-public abstract class NNLayer {
+public abstract class NNLayer implements Serializable{
 
+	private static final long serialVersionUID = 1L;
 	protected NN nn;
 	protected int activationCounter = -1;
 	protected ActivationFunction af;

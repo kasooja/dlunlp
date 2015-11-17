@@ -1,5 +1,6 @@
 package edu.insight.unlp.nn;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,8 +9,9 @@ import edu.insight.unlp.nn.NN;
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.common.Sequence;
 
-public class NNImpl implements NN {
+public class NNImpl implements NN, Serializable {
 
+	private static final long serialVersionUID = 1L;
 	protected List<NNLayer> layers;
 	protected ErrorFunction ef;
 
@@ -58,7 +60,7 @@ public class NNImpl implements NN {
 			double[] activations = null;
 			activations = input;		
 			for(NNLayer layer : layers){
-				activations = layer.computeActivations(activations, true);
+				activations = layer.computeActivations(activations, applyTraining);
 			}
 			double[] errors = ef.error(seq.target[i], activations);
 			if(applyTraining)

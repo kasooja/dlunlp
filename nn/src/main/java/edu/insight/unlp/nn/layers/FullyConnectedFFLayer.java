@@ -8,6 +8,9 @@ import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class FullyConnectedFFLayer extends NNLayer {
 
+	
+	private static final long serialVersionUID = 1L;
+
 	public FullyConnectedFFLayer(int numUnits, ActivationFunction af, NN nn) {
 		this.numUnits = numUnits;
 		this.af = af;

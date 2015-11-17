@@ -1,9 +1,10 @@
 package edu.insight.unlp.nn;
 
+import java.io.Serializable;
 import java.util.stream.IntStream;
 
-public abstract class ActivationFunction {
-	
+public abstract class ActivationFunction implements Serializable {
+	private static final long serialVersionUID = 1L;
 	public double[] activation(double[] input){
 		double[] activations = new double[input.length];
 		IntStream.range(0, input.length).forEach(i -> activations[i] = activation(input[i]));
@@ -14,8 +15,8 @@ public abstract class ActivationFunction {
 		IntStream.range(0, input.length).forEach(i -> derivatives[i] = activationDerivative(input[i]));
 		return derivatives;
 	}
-	
+
 	public abstract double activation(double input);
 	public abstract double activationDerivative(double input);
-	
+
 }

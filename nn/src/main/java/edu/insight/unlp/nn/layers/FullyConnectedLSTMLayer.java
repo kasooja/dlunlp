@@ -13,6 +13,11 @@ import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class FullyConnectedLSTMLayer extends NNLayer {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private ActivationFunction afInputGate, afForgetGate, afOutputGate, afCellOutput;
 
 	private WeightMatrix inputGateMatrix;

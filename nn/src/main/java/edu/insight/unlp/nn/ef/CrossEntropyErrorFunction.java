@@ -3,14 +3,21 @@
  */
 package edu.insight.unlp.nn.ef;
 
+import java.io.Serializable;
+
 import edu.insight.unlp.nn.ErrorFunction;
 
 /*
  * log loss function
  */
-public class CrossEntropyErrorFunction implements ErrorFunction {
+public class CrossEntropyErrorFunction implements ErrorFunction, Serializable {
 
-    public double[] error(double[] actual, double[] predicted) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public double[] error(double[] actual, double[] predicted) {
         double[] error = new double[actual.length+1];
         double crossEntropyError = 0.0;
         for (int i=0; i<actual.length; i++) {

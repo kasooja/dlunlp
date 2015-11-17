@@ -4,6 +4,11 @@ import edu.insight.unlp.nn.ActivationFunction;
 
 public class Tanh extends ActivationFunction {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public double activation(double input) {
 		if(input>20.0){
 			return 1.0;

@@ -1,7 +1,11 @@
 package edu.insight.unlp.nn.common;
 
-public class WeightMatrix {
+import java.io.Serializable;
+
+public class WeightMatrix implements Serializable {
 	
+	
+	private static final long serialVersionUID = 1L;
 	//flattened matrix	
 	public double[] weights; //keeps the weights of the connections from the previous layer, in lstm, cellStateInput weights
 	public double[] deltas;

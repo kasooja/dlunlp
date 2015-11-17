@@ -3,10 +3,17 @@
  */
 package edu.insight.unlp.nn.ef;
 
+import java.io.Serializable;
+
 import edu.insight.unlp.nn.ErrorFunction;
 
 
-public class SquareErrorFunction implements ErrorFunction {
+public class SquareErrorFunction implements ErrorFunction, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	public double[] error(double[] actual, double[] predicted) {
 		double[] error = new double[predicted.length+1];
