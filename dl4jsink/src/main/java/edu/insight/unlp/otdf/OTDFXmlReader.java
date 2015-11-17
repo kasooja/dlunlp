@@ -22,7 +22,7 @@ public class OTDFXmlReader {
 
 	public OTDFXmlReader(String OTDFXmlFilePath) {
 		this.xmlPath = OTDFXmlFilePath;
-		this.reader = BasicFileTools.getBufferedReaderFile(xmlPath);
+		this.reader = BasicFileTools.getBufferedReader(xmlPath);
 	}
 
 	public Iterator<OTDFFile> getIterator() throws IOException {

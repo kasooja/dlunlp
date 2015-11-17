@@ -40,7 +40,7 @@ public class BasicFileTools {
 		return read;
 	}
 
-	public static BufferedReader getBufferedReaderFile(String filePath) {
+	public static BufferedReader getBufferedReader(String filePath) {
 		return getBufferedReader(getFile(filePath));
 	}
 
