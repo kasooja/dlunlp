@@ -2,6 +2,8 @@
 package edu.insight.unlp.nn;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import edu.insight.unlp.nn.common.Sequence;
 
@@ -23,6 +25,8 @@ public interface NN {
 	public double sgdTrain(List<Sequence> training, double learningRate, boolean shuffle);
 	
 	public double[][] ff(Sequence seq, ErrorFunction ef, boolean applyTraining);
+	
+	public Map<NNLayer, double[][]> ff(Sequence seq, ErrorFunction ef, boolean applyTraining, Set<NNLayer> layersForOutput);
 	
 	public void resetError();
 	

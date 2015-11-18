@@ -2,7 +2,10 @@ package edu.insight.unlp.nn;
 
 import java.io.Serializable;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import edu.insight.unlp.nn.ErrorFunction;
 import edu.insight.unlp.nn.NN;
@@ -72,6 +75,43 @@ public class NNImpl implements NN, Serializable {
 		}
 		return target;
 	}
+
+	public Map<NNLayer, double[][]> ff(Sequence seq, ErrorFunction ef, boolean applyTraining, Set<NNLayer> layersForOutput) {
+		Map<NNLayer, double[][]> activationsMap = new HashMap<NNLayer, double[][]>();
+		int i = 0;
+		//double[][] target = new double[seq.inputSeq.length][];
+		for(NNLayer layer : layersForOutput){
+			double[][] layerTarget = new double[seq.inputSeq.length][];
+			activationsMap.put(layer, layerTarget);
+		}
+		if(applyTraining)
+			eg = new double[seq.inputSeq.length][];
+		for(double[] input : seq.inputSeq){
+			double[] activations = null;
+			activations = input;		
+			for(NNLayer layer : layers){
+				activations = layer.computeActivations(activations, applyTraining);
+				if(activationsMap.containsKey(layer)){
+					double[][] layerActivations = activationsMap.get(layer);
+					layerActivations[i] = activations;
+				}
+			}
+			double[] errors = ef.error(seq.target[i], activations);
+			if(applyTraining)
+				eg[i] = errors;
+			totalLoss = totalLoss + errors[errors.length-1];
+			totalSteps++;
+		//	target[i] = activations;
+			i++;
+		}
+//		NNLayer outputLayer = layers.get(layers.size()-1);
+//		if(layersForOutput.contains(outputLayer)){
+//			activationsMap.put(outputLayer, target);
+//		}
+		return activationsMap;
+	}
+
+
 
 	private void bp(double[][] errorGradient){
 		int o = errorGradient[0].length-1;
