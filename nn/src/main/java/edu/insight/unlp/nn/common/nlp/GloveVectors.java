@@ -13,10 +13,11 @@ import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class GloveVectors implements Word2Vector {
 
-	public static Map<String, double[]> vecs = new HashMap<String, double[]>();
-	public static String filePath = "src/test/resources/glove.6B.50d.txt";
+	public Map<String, double[]> vecs = new HashMap<String, double[]>();
+	public String filePath = "src/test/resources/glove.6B.50d.txt";
 
-	static {
+	public void setEmbeddingFilePath(String embeddingPath){
+		filePath = embeddingPath;
 		BufferedReader br = BasicFileTools.getBufferedReader(filePath);
 		String line = null;
 		try {
@@ -34,7 +35,7 @@ public class GloveVectors implements Word2Vector {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public double[] getWordVector(String word){
 		double[] vec = vecs.get(word);
 		if(vec==null){
@@ -44,7 +45,8 @@ public class GloveVectors implements Word2Vector {
 	}
 
 	public static void main(String[] args) {
-		double[] ds = vecs.get("the");
+		GloveVectors gvec = new GloveVectors();
+		double[] ds = gvec.getWordVector("the");
 		for(double j : ds){
 			System.out.println(j);
 		}

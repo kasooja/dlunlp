@@ -13,10 +13,13 @@ import edu.insight.unlp.nn.utils.BasicFileTools;
 
 public class HLBLVectors implements Word2Vector {
 
-	public static Map<String, double[]> vecs = new HashMap<String, double[]>();
-	public static String filePath = "src/test/resources/hlbl-embeddings-scaled.EMBEDDING_SIZE=50.txt";
+	public Map<String, double[]> vecs = new HashMap<String, double[]>();
+	public String filePath = "src/test/resources/hlbl-embeddings-scaled.EMBEDDING_SIZE=50.txt";
 
-	static {
+	
+	@Override
+	public void setEmbeddingFilePath(String embeddingFilePath) {
+		filePath = embeddingFilePath;
 		BufferedReader br = BasicFileTools.getBufferedReader(filePath);
 		String line = null;
 		try {

@@ -5,16 +5,15 @@ import java.io.IOException;
 
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.ops.transforms.Transforms;
 
 public class GoogleNGramVectors implements Word2Vector {
 
-	private static String gModelPath = "/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz";
-	private static Word2Vec word2Vec;
-
-	static {
+	private String gModelPath = "/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz";
+	private Word2Vec word2Vec;
+	
+	@Override
+	public void setEmbeddingFilePath(String embeddingFilePath) {
+		gModelPath = embeddingFilePath;
 		try {
 			System.err.print("Loading GoogleNews-vectors-negative300 Word2Vec model . . .");
 			word2Vec = WordVectorSerializer.loadGoogleModel(new File(gModelPath), true);
@@ -22,8 +21,10 @@ public class GoogleNGramVectors implements Word2Vector {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
+		
 	}
 
+	
 	@Override
 	public double[] getWordVector(String word) {
 		return word2Vec.getWordVector(word);
@@ -50,5 +51,6 @@ public class GoogleNGramVectors implements Word2Vector {
 	public static void main(String[] args) {
 		
 	}
+
 
 }
