@@ -16,8 +16,16 @@ public class GloveVectors implements Word2Vector {
 	public Map<String, double[]> vecs = new HashMap<String, double[]>();
 	public String filePath = "src/test/resources/glove.6B.50d.txt";
 
-	public void setEmbeddingFilePath(String embeddingPath){
-		filePath = embeddingPath;
+	public GloveVectors(String filePath) {
+		this.filePath = filePath;
+		loadEmbeddings(this.filePath);
+	}
+	
+	public GloveVectors() {
+		loadEmbeddings(filePath);
+	}
+	
+	private void loadEmbeddings(String filePath){
 		BufferedReader br = BasicFileTools.getBufferedReader(filePath);
 		String line = null;
 		try {
@@ -64,7 +72,6 @@ public class GloveVectors implements Word2Vector {
 			return -1;
 		return  Nd4j.getBlasWrapper().dot(vector1, vector2);
 	}
-
 
 }
 

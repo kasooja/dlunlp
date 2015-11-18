@@ -6,6 +6,4 @@ public interface Word2Vector {
 
 	public double getSim(String word1, String word2);
 	
-	public void setEmbeddingFilePath(String filePath);
-
 }

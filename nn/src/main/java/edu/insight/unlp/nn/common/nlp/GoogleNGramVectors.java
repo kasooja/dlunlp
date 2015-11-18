@@ -8,23 +8,28 @@ import org.deeplearning4j.models.word2vec.Word2Vec;
 
 public class GoogleNGramVectors implements Word2Vector {
 
-	private String gModelPath = "/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz";
 	private Word2Vec word2Vec;
-	
-	@Override
-	public void setEmbeddingFilePath(String embeddingFilePath) {
-		gModelPath = embeddingFilePath;
+	private String filePath = "/Users/kartik/Work/dhundo-dobara/Corpus/ML/Corpus/GoogleNews-vectors-negative300.bin.gz";
+
+	public GoogleNGramVectors(String filePath){
+		this.filePath = filePath;
+		loadEmbeddings(this.filePath);
+	}
+
+	public GoogleNGramVectors(){
+		loadEmbeddings(filePath);
+	}
+
+	private void loadEmbeddings(String filePath) {
 		try {
 			System.err.print("Loading GoogleNews-vectors-negative300 Word2Vec model . . .");
-			word2Vec = WordVectorSerializer.loadGoogleModel(new File(gModelPath), true);
+			word2Vec = WordVectorSerializer.loadGoogleModel(new File(filePath), true);
 			System.err.println("Done");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}	
-		
 	}
 
-	
 	@Override
 	public double[] getWordVector(String word) {
 		return word2Vec.getWordVector(word);
@@ -46,10 +51,6 @@ public class GoogleNGramVectors implements Word2Vector {
 		//		if(vector1 == null || vector2 == null)
 		//			return -1;
 		//		return  Nd4j.getBlasWrapper().dot(vector1, vector2);
-	}
-	
-	public static void main(String[] args) {
-		
 	}
 
 

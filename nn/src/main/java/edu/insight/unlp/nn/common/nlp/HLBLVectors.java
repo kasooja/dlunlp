@@ -16,10 +16,16 @@ public class HLBLVectors implements Word2Vector {
 	public Map<String, double[]> vecs = new HashMap<String, double[]>();
 	public String filePath = "src/test/resources/hlbl-embeddings-scaled.EMBEDDING_SIZE=50.txt";
 
+	public HLBLVectors() {
+		loadEmbeddings(filePath);
+	}	
+
+	public HLBLVectors(String filePath) {
+		this.filePath = filePath;
+		loadEmbeddings(this.filePath);
+	}	
 	
-	@Override
-	public void setEmbeddingFilePath(String embeddingFilePath) {
-		filePath = embeddingFilePath;
+	public void loadEmbeddings(String filePath) {
 		BufferedReader br = BasicFileTools.getBufferedReader(filePath);
 		String line = null;
 		try {
@@ -37,11 +43,11 @@ public class HLBLVectors implements Word2Vector {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public double[] getWordVector(String word){
 		return vecs.get(word);
 	}
-	
+
 	@Override
 	public double getSim(String word1, String word2) {
 		INDArray array1 = Nd4j.create(getWordVector(word1));
