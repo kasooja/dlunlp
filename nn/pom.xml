@@ -101,25 +101,17 @@
 			<artifactId>java-string-similarity</artifactId>
 			<version>0.12</version>
 		</dependency>
-		<dependency>
-			<groupId>edu.insight</groupId>
-			<artifactId>dsm</artifactId>
-			<version>1.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/test/resources/lib/spmf.jar</systemPath>
-		</dependency>
+		<!-- <dependency> <groupId>edu.insight</groupId> <artifactId>dsm</artifactId> 
+			<version>1.0</version> <scope>system</scope> <systemPath>${project.basedir}/src/test/resources/lib/spmf.jar</systemPath> 
+			</dependency> -->
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-dev</artifactId>
 			<version>3.7.12</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>net.sf.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>2.4</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/test/resources/lib/opencsv-2.4.jar</systemPath>
-		</dependency> -->
+		<!-- <dependency> <groupId>net.sf.opencsv</groupId> <artifactId>opencsv</artifactId> 
+			<version>2.4</version> <scope>system</scope> <systemPath>${project.basedir}/src/test/resources/lib/opencsv-2.4.jar</systemPath> 
+			</dependency> -->
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>LibSVM</artifactId>
