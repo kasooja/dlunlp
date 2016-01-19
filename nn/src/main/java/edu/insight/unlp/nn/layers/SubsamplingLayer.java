@@ -26,4 +26,10 @@ public class SubsamplingLayer extends NNLayer {
 		
 	}
 
+	@Override
+	public double[] errorGradient(double[] eg, double[] input, double[] na) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -45,6 +45,34 @@ public class FullyConnectedFFLayer extends NNLayer {
 		activationCounter--;
 		return egPrevLayer;
 	}
+	
+	public double[] errorGradient(double[] eg, double[] input, double[] na) {
+		int currentIndex = nn.getLayers().indexOf(this);
+		double[] egPrevLayer = eg;
+		if(currentIndex!=0){
+			NNLayer prevLayer = nn.getLayers().get(currentIndex-1);
+			double[] prevLayerActivations = prevLayer.lastActivations().get(activationCounter);
+			egPrevLayer = new double[prevLayerActivations.length + 1];
+			double[] deriv = lastActivationDerivatives.get(activationCounter);
+			for(int i=0; i<eg.length-1; i++){
+				int currentWeightIndex = i * (prevLayerActivations.length + 1);
+				double lambda = eg[i] * deriv[i];
+				//deltas[currentWeightIndex] = (deltas[currentWeightIndex] * activationCounter + 1 * lambda) / (activationCounter + 1); //the bias one, multiplied the weight by 1, so added directly to outputs
+				weightMatrix.deltas[currentWeightIndex] = weightMatrix.deltas[currentWeightIndex] + 1 * lambda; //the bias one, multiplied the weight by 1, so added directly to outputs
+				for(int j=0; j<prevLayerActivations.length; j++){					
+					double delta = lambda * prevLayerActivations[j];
+					//deltas[currentWeightIndex + j + 1] = (deltas[currentWeightIndex + j + 1] * activationCounter + delta) / (activationCounter+1); used for averaging for batch gd
+					weightMatrix.deltas[currentWeightIndex + j + 1] = weightMatrix.deltas[currentWeightIndex + j + 1] + delta;
+					egPrevLayer[j] = egPrevLayer[j] + lambda * weightMatrix.weights[currentWeightIndex + j + 1];
+				}
+			}
+			egPrevLayer[prevLayerActivations.length] = eg[eg.length-1];
+		} 
+		resetActivationAndDerivatives(activationCounter);
+		activationCounter--;
+		return egPrevLayer;
+	}
+
 
 	private void resetActivationAndDerivatives(int activationCounter){
 		lastActivations.put(activationCounter, null);

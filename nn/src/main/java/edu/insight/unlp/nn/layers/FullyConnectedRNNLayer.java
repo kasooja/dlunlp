@@ -89,9 +89,17 @@ public class FullyConnectedRNNLayer extends NNLayer {
 			for (int m = j; m < numUnits+j; m++) {
 				signals[i] += activations.get(activationCounter)[m-j] * weightMatrix.weights[i * (input.length + 1 + numUnits) + m + 1];
 			}
+//			for (int m = j; m < numUnits+j; m++) {
+//				signals[i] += activations.get(activationCounter)[m-j] * weightMatrix.weights[i * (input.length + 1 + numUnits) + m + 1];
+//			}
 		}
 		return signals;
 	}
 
+	@Override
+	public double[] errorGradient(double[] eg, double[] input, double[] na) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }

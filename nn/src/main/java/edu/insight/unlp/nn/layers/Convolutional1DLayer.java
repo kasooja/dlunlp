@@ -45,13 +45,13 @@ public class Convolutional1DLayer extends NNLayer {
 			int prevLayerAbstractUnits = prevLayerUnits / v;
 			int kernelFeatureMapOutputSize = prevLayerAbstractUnits - kernelSize + 1;
 			double featureMap[] = new double[kernelFeatureMapOutputSize];
-			
-//			for(int i = 0; i < outputs.length; i++) {
-//				outputs[i] = 1 * kernelWeightMatrix.weights[i * (input.length + 1)]; //the bias one, multiplied the weight by 1, so added directly to outputs
-//				for (int m = 0; m < input.length; m++) {
-//					outputs[i] += input[m] * kernelWeightMatrix.weights[i * (input.length + 1) + m + 1];
-//				}
-//			}
+
+			//			for(int i = 0; i < outputs.length; i++) {
+			//				outputs[i] = 1 * kernelWeightMatrix.weights[i * (input.length + 1)]; //the bias one, multiplied the weight by 1, so added directly to outputs
+			//				for (int m = 0; m < input.length; m++) {
+			//					outputs[i] += input[m] * kernelWeightMatrix.weights[i * (input.length + 1) + m + 1];
+			//				}
+			//			}
 		}
 		//return outputs;
 		return null;
@@ -74,6 +74,12 @@ public class Convolutional1DLayer extends NNLayer {
 			kernelWeightMatrices[i].stepCache = new double[totalWeightParams];
 			initializeLayerWeights(kernelWeightMatrices[i], 0.0);
 		}
+	}
+
+	@Override
+	public double[] errorGradient(double[] eg, double[] input, double[] na) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

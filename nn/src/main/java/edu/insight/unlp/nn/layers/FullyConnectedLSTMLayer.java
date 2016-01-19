@@ -289,4 +289,10 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		return result;
 	}
 
+	@Override
+	public double[] errorGradient(double[] eg, double[] input, double[] na) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
