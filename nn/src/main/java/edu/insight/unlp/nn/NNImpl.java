@@ -7,9 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.insight.unlp.nn.ErrorFunction;
-import edu.insight.unlp.nn.NN;
-import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.common.Sequence;
 
 public class NNImpl implements NN, Serializable {
@@ -101,17 +98,15 @@ public class NNImpl implements NN, Serializable {
 				eg[i] = errors;
 			totalLoss = totalLoss + errors[errors.length-1];
 			totalSteps++;
-		//	target[i] = activations;
+			//	target[i] = activations;
 			i++;
 		}
-//		NNLayer outputLayer = layers.get(layers.size()-1);
-//		if(layersForOutput.contains(outputLayer)){
-//			activationsMap.put(outputLayer, target);
-//		}
+		//		NNLayer outputLayer = layers.get(layers.size()-1);
+		//		if(layersForOutput.contains(outputLayer)){
+		//			activationsMap.put(outputLayer, target);
+		//		}
 		return activationsMap;
 	}
-
-
 
 	private void bp(double[][] errorGradient){
 		int o = errorGradient[0].length-1;
@@ -127,6 +122,7 @@ public class NNImpl implements NN, Serializable {
 			}
 		}
 	}
+
 
 	public void resetActivationCounter(boolean training){
 		for(NNLayer layer : layers){
@@ -168,5 +164,6 @@ public class NNImpl implements NN, Serializable {
 	public double getError() {
 		return totalLoss/totalSteps;
 	}
+
 
 }
