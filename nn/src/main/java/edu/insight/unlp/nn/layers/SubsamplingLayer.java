@@ -1,9 +1,9 @@
 package edu.insight.unlp.nn.layers;
 
-import java.util.Map;
 
 import edu.insight.unlp.nn.NNLayer;
 import edu.insight.unlp.nn.common.WeightMatrix;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
 public class SubsamplingLayer extends NNLayer {
 
@@ -15,7 +15,7 @@ public class SubsamplingLayer extends NNLayer {
 
 	@Override
 	public double[] computeSignals(double[] input, WeightMatrix weights,
-			Map<Integer, double[]> activations) {
+			Int2ObjectMap<double[]> activations) {
 		// TODO Auto-generated method stub
 		return null;
 	}

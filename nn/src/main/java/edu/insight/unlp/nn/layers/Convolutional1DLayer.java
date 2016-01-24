@@ -33,7 +33,7 @@ public class Convolutional1DLayer extends NNLayer {
 		return null;
 	}
 
-	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {  //MLP does not require its activations for feedback, so not used in the method for computing signals
+	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Int2ObjectMap<double[]> activations) {  //MLP does not require its activations for feedback, so not used in the method for computing signals
 		if(prevLayerUnits == -1){
 			return input;
 		}

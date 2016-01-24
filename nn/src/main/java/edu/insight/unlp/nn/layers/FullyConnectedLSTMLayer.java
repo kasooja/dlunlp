@@ -156,7 +156,7 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 	}
 
 
-	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {
+	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Int2ObjectMap<double[]> activations) {
 		double signals[] = new double[numUnits];
 		for (int i = 0; i < signals.length; i++) {
 			signals[i] = 1 * weightMatrix.weights[i * (input.length + 1 + numUnits)]; //the bias one, multiplied the weight by 1, so added directly to outputs

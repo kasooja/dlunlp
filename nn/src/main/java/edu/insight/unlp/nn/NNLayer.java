@@ -2,11 +2,12 @@ package edu.insight.unlp.nn;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import edu.insight.unlp.nn.common.WeightInitializer;
 import edu.insight.unlp.nn.common.WeightMatrix;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 
 public abstract class NNLayer implements Serializable {
 
@@ -15,8 +16,8 @@ public abstract class NNLayer implements Serializable {
 	protected int overallNNOutputUnits; 
 	protected int activationCounter = -1;
 	protected ActivationFunction af;
-	protected Map<Integer, double[]> lastActivationDerivatives;
-	protected Map<Integer, double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
+	protected Int2ObjectMap<double[]> lastActivationDerivatives;
+	protected Int2ObjectMap<double[]> lastActivations; //needed by this layer for feedback in RNNs, it keeps the lstm block output activations as feedback  	
 	protected int numUnits; 
 	protected int prevLayerUnits;
 	protected WeightMatrix weightMatrix;
@@ -30,7 +31,7 @@ public abstract class NNLayer implements Serializable {
 		return numUnits;
 	}
 
-	public Map<Integer, double[]> lastActivations() {
+	public Int2ObjectMap<double[]> lastActivations() {
 		return lastActivations;
 	}
 
@@ -76,25 +77,25 @@ public abstract class NNLayer implements Serializable {
 
 	public void initializeLayer(int previousLayerUnits, boolean feedback){
 		this.prevLayerUnits = previousLayerUnits;
-		lastActivations = new HashMap<Integer, double[]>();
+		lastActivations = new Int2ObjectArrayMap<double[]>();
 		lastActivations.put(-1, new double[numUnits]);
 		if(prevLayerUnits==-1){
 			return;
 		}
 		initializeLayerWeights(weightMatrix, feedback, 0.0);
-		lastActivationDerivatives = new HashMap<Integer, double[]>();
+		lastActivationDerivatives = new Int2ObjectArrayMap<double[]>();
 	}
 	
 	public void initializeLayer(int previousLayerUnits, boolean ownFeedback, boolean prevOutputFeedback){
 		overallNNOutputUnits = nn.getLayers().get(nn.getLayers().size()-1).numUnits;
 		this.prevLayerUnits = previousLayerUnits;
-		lastActivations = new HashMap<Integer, double[]>();
+		lastActivations = new Int2ObjectArrayMap<double[]>();
 		lastActivations.put(-1, new double[numUnits]);
 		if(prevLayerUnits==-1){
 			return;
 		}
 		initializeLayerWeights(weightMatrix, ownFeedback, 0.0, true);
-		lastActivationDerivatives = new HashMap<Integer, double[]>();
+		lastActivationDerivatives = new Int2ObjectArrayMap<double[]>();
 	}
 
 	protected void initializeLayerWeights(WeightMatrix weightMatrix, boolean feedback, double biasWeight){
@@ -146,7 +147,7 @@ public abstract class NNLayer implements Serializable {
 	 */
 	public abstract double[] errorGradient(double[] eg, double[] input, double[] na);
 
-	public abstract double[] computeSignals(double[] input, WeightMatrix weights, Map<Integer, double[]> activations);
+	public abstract double[] computeSignals(double[] input, WeightMatrix weights, Int2ObjectMap<double[]> activations);
 	public abstract void initializeLayer(int previousLayerUnits);
 
 }

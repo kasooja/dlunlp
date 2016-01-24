@@ -111,7 +111,7 @@ public class NAFCRNNLayer extends NNLayer {
 			lastActivationDerivatives.put(activationCounter, null);
 	}
 
-	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Map<Integer, double[]> activations) {
+	public double[] computeSignals(double[] input, WeightMatrix weightMatrix, Int2ObjectMap<double[]> activations) {
 		double signals[] = new double[numUnits];
 		int multiplierSize = input.length + 1 + numUnits + overallNNOutputUnits;
 		Map<Integer, double[]> lastOutputActivations = nn.getLayers().get(nn.getLayers().size()-1).lastActivations();
