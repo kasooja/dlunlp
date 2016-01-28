@@ -35,6 +35,7 @@ public abstract class NNLayer implements Serializable {
 
 	public void resetActivationCounter(boolean training){
 		activationCounter = -1;
+		cleanUpTheMess();
 	}
 
 	public void update(double learningRate, WeightMatrix weightMatrix){
@@ -152,6 +153,7 @@ public abstract class NNLayer implements Serializable {
 	 * testing for NA
 	 */
 	public abstract double[] errorGradient(double[] eg, double[] input, double[] na);
+	
 	public void cleanUpTheMess(){
 		lastActivations = new HashMap<Integer, double[]>();
 		lastActivations.put(-1, new double[numUnits]);

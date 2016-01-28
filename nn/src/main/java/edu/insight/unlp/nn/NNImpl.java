@@ -105,6 +105,7 @@ public class NNImpl implements NN, Serializable {
 		//		if(layersForOutput.contains(outputLayer)){
 		//			activationsMap.put(outputLayer, target);
 		//		}
+		resetActivationCounter(false);
 		return activationsMap;
 	}
 

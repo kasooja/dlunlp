@@ -14,6 +14,4 @@ public interface NANN extends NN {
 	 */
 	public void bpNA(double[][] errorGradients, Sequence seq, double learningRate);
 	
-	public void cleanUpTheMess();
-
 }
