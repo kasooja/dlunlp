@@ -26,7 +26,7 @@ public class NANNImpl implements NANN, Serializable {
 		this.ef = ef;
 		this.naNN = naNN;
 	}
-	
+
 	public NANNImpl(ErrorFunction ef){
 		this.ef = ef;
 		//this.naNN = naNN;
@@ -52,7 +52,10 @@ public class NANNImpl implements NANN, Serializable {
 		for(Sequence seq : training){
 			ff(seq, ef, true);
 			double[][] naErrors = bp(eg);
-			naNN.bpNA(naErrors, seq, learningRate);
+			if(randomBoolean()){
+				naNN.bpNA(naErrors, seq, learningRate);
+			}
+			naNN.resetActivationCounter(true);
 			update(learningRate);
 			resetActivationCounter(true);
 		}
@@ -199,6 +202,12 @@ public class NANNImpl implements NANN, Serializable {
 			layer.resetActivationCounter(training);
 		}
 	}
+	
+	public void cleanUpTheMess(){
+		for(NNLayer layer : layers){
+			layer.cleanUpTheMess();
+		}
+	}
 
 	@Override
 	public int numOutputUnits() {
@@ -233,8 +242,10 @@ public class NANNImpl implements NANN, Serializable {
 	public double getError() {
 		return totalLoss/totalSteps;
 	}
-	
-	
+
+	public boolean randomBoolean(){
+		return Math.random() < 0.5;
+	}
 
 	public void bpNA(double[][] errorGradients, Sequence seq, double learningRate){
 		double[][] inputSeq = seq.inputSeq;

@@ -294,5 +294,25 @@ public class FullyConnectedLSTMLayer extends NNLayer {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public void cleanUpTheMess() {
+		super.cleanUpTheMess();
+		lastOutputGateActivations = new HashMap<Integer, double[]>();
+		lastInputGateActivations = new HashMap<Integer, double[]>();
+		lastForgetGateActivations = new HashMap<Integer, double[]>();
+
+		cellStateLastActivations = new HashMap<Integer, double[]>();
+		cellStateLastActivations.put(-1, new double[numUnits]);
+
+		lastCellStateInputActivations = new HashMap<Integer, double[]>();
+
+		nextStageOutputError = new double[numUnits + 1];
+		nextStageCellStateError = new double[numUnits+1];
+
+		lastOutputGateDerivatives = new HashMap<Integer, double[]>();
+		lastForgetGateDerivatives = new HashMap<Integer, double[]>();
+		lastInputGateDerivatives = new HashMap<Integer, double[]>();
+	}
 
 }

@@ -8,7 +8,7 @@ import edu.insight.unlp.nn.common.WeightMatrix;
 
 public class FullyConnectedFFLayer extends NNLayer {
 
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public FullyConnectedFFLayer(int numUnits, ActivationFunction af, NN nn) {
@@ -45,7 +45,7 @@ public class FullyConnectedFFLayer extends NNLayer {
 		activationCounter--;
 		return egPrevLayer;
 	}
-	
+
 	public double[] errorGradient(double[] eg, double[] input, double[] na) {
 		int currentIndex = nn.getLayers().indexOf(this);
 		double[] egPrevLayer = eg;

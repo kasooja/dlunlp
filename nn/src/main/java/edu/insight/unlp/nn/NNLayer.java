@@ -3,7 +3,6 @@ package edu.insight.unlp.nn;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.IntStream;
 
 import edu.insight.unlp.nn.common.WeightInitializer;
 import edu.insight.unlp.nn.common.WeightMatrix;
@@ -65,16 +64,16 @@ public abstract class NNLayer implements Serializable {
 		double[] activations = new double[numUnits];
 		activationCounter++;
 		//IntStream.range(0, signals.length).forEach(i -> activations[i] = af.activation(signals[i]));
-        for(int i = 0; i < signals.length; i++) {
-            activations[i] = af.activation(signals[i]);
-        }
+		for(int i = 0; i < signals.length; i++) {
+			activations[i] = af.activation(signals[i]);
+		}
 		lastActivations.put(activationCounter, activations);
 		if(training && prevLayerUnits != -1){
-		    double[] derivatives = new double[numUnits];
+			double[] derivatives = new double[numUnits];
 			//IntStream.range(0, signals.length).forEach(i -> derivatives[i] = af.activationDerivative(signals[i]));
-            for(int i = 0; i < signals.length; i++) {
-                derivatives[i] = af.activationDerivative(signals[i]);
-            }
+			for(int i = 0; i < signals.length; i++) {
+				derivatives[i] = af.activationDerivative(signals[i]);
+			}
 			lastActivationDerivatives.put(activationCounter, derivatives);
 		}
 		return activations;
@@ -90,7 +89,7 @@ public abstract class NNLayer implements Serializable {
 		initializeLayerWeights(weightMatrix, feedback, 0.0);
 		lastActivationDerivatives = new HashMap<Integer, double[]>();
 	}
-	
+
 	public void initializeLayer(int previousLayerUnits, boolean ownFeedback, boolean prevOutputFeedback){
 		overallNNOutputUnits = nn.getLayers().get(nn.getLayers().size()-1).numUnits;
 		this.prevLayerUnits = previousLayerUnits;
@@ -115,7 +114,7 @@ public abstract class NNLayer implements Serializable {
 		weightMatrix.stepCache = new double[totalWeightParams];
 		initializeLayerWeights(weightMatrix, biasWeight);
 	}
-	
+
 	protected void initializeLayerWeights(WeightMatrix weightMatrix, boolean ownFeedback, double biasWeight, boolean outputFeedback){
 		int totalWeightParams = (prevLayerUnits+1) * numUnits;
 		weightMatrix.biasMultiplier = (prevLayerUnits+1);
@@ -146,13 +145,17 @@ public abstract class NNLayer implements Serializable {
 	}
 
 	public abstract double[] errorGradient(double[] input);
+	public abstract double[] computeSignals(double[] input, WeightMatrix weights, Map<Integer, double[]> activations);
+	public abstract void initializeLayer(int previousLayerUnits);
 
 	/*
 	 * testing for NA
 	 */
 	public abstract double[] errorGradient(double[] eg, double[] input, double[] na);
-
-	public abstract double[] computeSignals(double[] input, WeightMatrix weights, Map<Integer, double[]> activations);
-	public abstract void initializeLayer(int previousLayerUnits);
+	public void cleanUpTheMess(){
+		lastActivations = new HashMap<Integer, double[]>();
+		lastActivations.put(-1, new double[numUnits]);
+		lastActivationDerivatives = new HashMap<Integer, double[]>();
+	}
 
 }
