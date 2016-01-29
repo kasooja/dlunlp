@@ -305,6 +305,7 @@ public class NANNImpl implements NANN, Serializable {
 		for(NNLayer layer : layers){
 			activations = layer.computeActivations(activations, applyTraining);
 		}
+		resetActivationCounter(false);
 		return activations;
 	}
 
