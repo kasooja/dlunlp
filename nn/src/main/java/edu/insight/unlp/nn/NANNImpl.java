@@ -49,16 +49,19 @@ public class NANNImpl implements NANN, Serializable {
 		totalLoss = 0.0;
 		totalSteps = 0.0;
 		resetActivationCounter(true);
+		double finalNaLoss = 0.0;
+
 		for(Sequence seq : training){
 			ff(seq, ef, true);
 			double[][] naErrors = bp(eg);
-			if(randomBoolean()){
-				naNN.bpNA(naErrors, seq, learningRate);
-			}
+			//if(randomBoolean()){
+			finalNaLoss = naNN.bpNA(naErrors, seq, learningRate);
+			//}
 			naNN.resetActivationCounter(true);
 			update(learningRate);
 			resetActivationCounter(true);
 		}
+		System.out.println("epoch[ below"+"/" + "below" + "] train loss = " + finalNaLoss);
 		return totalLoss/totalSteps;
 	}
 
@@ -202,7 +205,7 @@ public class NANNImpl implements NANN, Serializable {
 			layer.resetActivationCounter(training);
 		}
 	}
-	
+
 	public void cleanUpTheMess(){
 		for(NNLayer layer : layers){
 			layer.cleanUpTheMess();
@@ -247,9 +250,11 @@ public class NANNImpl implements NANN, Serializable {
 		return Math.random() < 0.5;
 	}
 
-	public void bpNA(double[][] errorGradients, Sequence seq, double learningRate){
+	public double bpNA(double[][] errorGradients, Sequence seq, double learningRate){
 		double[][] inputSeq = seq.inputSeq;
 		double[][] naInput = ((NASequence) seq).naInput;
+		double totalLoss = 0.0;
+		double totalSteps = 0.0;
 		for(int egC=0; egC<errorGradients.length; egC++){
 			double[] eg = errorGradients[egC];
 			double[] ds = new double[naInput[0].length];
@@ -268,11 +273,14 @@ public class NANNImpl implements NANN, Serializable {
 				}
 				finalEgs[0][0] = finalEg;
 				finalEgs[0][1] = finalEg;
+				totalLoss = totalLoss + finalEg;
+				totalSteps++;
 				bpNA(finalEgs, inp, ds);
 				update(learningRate);
 			}
 		}
 		resetActivationCounter(true);
+		return totalLoss/totalSteps;
 	}
 
 	public void bpNA(double[][] errorGradients, double[] inp, double[] na){
