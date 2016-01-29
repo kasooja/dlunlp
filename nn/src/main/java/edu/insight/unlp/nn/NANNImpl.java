@@ -305,10 +305,8 @@ public class NANNImpl implements NANN, Serializable {
 		for(NNLayer layer : layers){
 			activations = layer.computeActivations(activations, applyTraining);
 		}
-		resetActivationCounter(false);
 		return activations;
 	}
-
 
 	private double[] elementMul(double[] one, double[] two){
 		int numUnits = two.length; 
