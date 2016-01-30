@@ -271,6 +271,7 @@ public class NANNImpl implements NANN, Serializable {
 				for(double el : elementMulRes){
 					finalEg = finalEg + el;
 				}
+				finalEg = Math.abs(finalEg);
 				finalEgs[0][0] = finalEg;
 				finalEgs[0][1] = finalEg;
 				totalLoss = totalLoss + finalEg;
