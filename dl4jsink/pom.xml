@@ -17,10 +17,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<nd4j.version>0.4-rc3.6</nd4j.version>
-		<deeplearning4j.version>0.4-rc3.6</deeplearning4j.version>
-		<canova.version>0.0.0.12</canova.version>
+		<nd4j.version>0.4-rc3.8</nd4j.version>
+		<deeplearning4j.version>0.4-rc3.8</deeplearning4j.version>
+		<canova.version>0.0.0.14</canova.version>
 	</properties>
+
 
 	<dependencies>
 
@@ -36,12 +37,20 @@
 			<version>3.0.3</version>
 		</dependency>
 
+		 <dependency> <groupId>org.nd4j</groupId> <artifactId>nd4j-x86</artifactId> 
+			<version>0.4-rc3.8</version> </dependency>
 
-		<dependency>
+		<!--<dependency> <groupId>org.nd4j</groupId> <artifactId>nd4j-jcublas-common</artifactId> 
+			<version>0.4-rc3.7</version> </dependency> -->
+
+		<!--  <dependency>
 			<groupId>org.nd4j</groupId>
 			<artifactId>nd4j-jblas</artifactId>
-			<version>${nd4j.version}</version>
-		</dependency>
+			<version>0.4-rc3.6</version>
+		</dependency>-->
+
+		<!-- <dependency> <groupId>org.nd4j</groupId> <artifactId>nd4j-jblas</artifactId> 
+			<version>${nd4j.version}</version> </dependency> -->
 
 		<dependency>
 			<groupId>org.nd4j</groupId>

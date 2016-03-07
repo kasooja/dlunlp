@@ -36,8 +36,6 @@ public class Word2VecModelBuilder {
 			SerializationUtils.saveObject(vec, new File(args[1]));
 		} catch (ResourceInitializationException e1) {
 			e1.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	
@@ -59,8 +57,6 @@ public class Word2VecModelBuilder {
 			SerializationUtils.saveObject(vec, new File(args[1]));
 		} catch (ResourceInitializationException e1) {
 			e1.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 }
