@@ -19,7 +19,7 @@ import org.deeplearning4j.models.word2vec.wordstore.inmemory.InMemoryLookupCache
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
 
-public class Dl4j_WVSerializerExtended extends WordVectorSerializer {
+public class Dl4j_ExtendedWVSerializer extends WordVectorSerializer {
 	/**
 	 * Loads an in memory cache from the given path (sets syn0 and the vocab)
 	 *

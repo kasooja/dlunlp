@@ -38,16 +38,16 @@ public class CF_SuggDataProducer {
 	private Constructor<? extends DataSetIterator> dataItConstructor;
 
 	///*
-	private static Map<String, List<TaggedWord>> tagMap = new HashMap<String, List<TaggedWord>>();
-	private static String tagMapPath = "src/main/resources/suggData/sentTag.map"; 
-
-	private int howManyNot = 0;
-
-	static {
-		if(new File(tagMapPath).exists()){
-			tagMap = SerializationUtils.readObject(new File(tagMapPath));
-		}
-	}
+//	private static Map<String, List<TaggedWord>> tagMap = new HashMap<String, List<TaggedWord>>();
+//	private static String tagMapPath = "src/main/resources/suggData/sentTag.map"; 
+//
+//	private int howManyNot = 0;
+//
+//	static {
+//		if(new File(tagMapPath).exists()){
+//			tagMap = SerializationUtils.readObject(new File(tagMapPath));
+//		}
+//	}
 	//*/
 
 	public CF_SuggDataProducer(int noOfFolds, String dataPath, WordVectors wordVectors, int trainBatchSize,
@@ -79,7 +79,7 @@ public class CF_SuggDataProducer {
 			public void procRow(int rowIndex, String... values) {
 				
 				///*
-				System.out.println(csvTotCount++);
+			//	System.out.println(csvTotCount++);
 				//*/
 				
 				String id = values[0];
@@ -96,11 +96,11 @@ public class CF_SuggDataProducer {
 				}			
 
 				///*
-				if(!tagMap.containsKey(text)){	
-					howManyNot++;
-					List<TaggedWord> tagText = StanfordNLPUtil.getTagText(text);
-					tagMap.put(text,  tagText);					
-				}
+//				if(!tagMap.containsKey(text)){	
+//					howManyNot++;
+//					List<TaggedWord> tagText = StanfordNLPUtil.getTagText(text);
+//					tagMap.put(text,  tagText);					
+//				}
 				//*/
 
 				if(suggLabel == 0){
@@ -141,8 +141,6 @@ public class CF_SuggDataProducer {
 			testPoss.add(posEx);
 			posCursor++;
 		}
-
-//		WVPOS_CF_SuggDataIterator testIt = new WVPOS_CF_SuggDataIterator(wordVectors, testPoss, testNegs, testBatchSize, truncateReviewsToLength);		
 
 		DataSetIterator testIt = getNewDataItrInstance(testPoss, testNegs, testBatchSize);
 		
@@ -207,16 +205,16 @@ public class CF_SuggDataProducer {
 		return null;
 	}
 	
-	public static void serialize(){
-		SerializationUtils.saveObject(tagMap, new File(tagMapPath));
-	}
+//	public static void serialize(){
+//		SerializationUtils.saveObject(tagMap, new File(tagMapPath));
+//	}
 
 	public static void main(String[] args) {
-		String DATA_PATH = "/home/kartik/git/dlunlp/dl4jsink/src/main/resources/suggData/all.csv";
+		String DATA_PATH = "/home/kartik/git/dlunlp/dl4jsink/src/main/resources/suggData/hotel.csv";
 		String WORD_VECTORS_PATH_GLOVE = "/home/kartik/git/dlunlp/dl4jsink/src/main/resources/models/glove.6B.50d.txt";
 		WordVectors wordVectors = null;
 		try {
-			wordVectors = Dl4j_WVSerializerExtended.loadTxtVectors(new File(WORD_VECTORS_PATH_GLOVE));
+			wordVectors = Dl4j_ExtendedWVSerializer.loadTxtVectors(new File(WORD_VECTORS_PATH_GLOVE));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -226,9 +224,9 @@ public class CF_SuggDataProducer {
 		CF_SuggDataProducer dataProducer = new CF_SuggDataProducer(10, DATA_PATH, wordVectors, 
 				trainBatchSize, testBatchSize, truncateReviewsToLength, WVPOS_SuggDataIterator.class);
 		System.out.println("Total Data Size: " + dataProducer.csvTotCount);
-		System.out.println("Map not contains: " + dataProducer.howManyNot + " items");
-		System.out.println("Map: " + tagMap.size());
-		serialize();
+		//System.out.println("Map not contains: " + dataProducer.howManyNot + " items");
+		//System.out.println("Map: " + tagMap.size());
+		//serialize();
 	}
 
 }
